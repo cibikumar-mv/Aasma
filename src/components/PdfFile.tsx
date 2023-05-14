@@ -1,14 +1,11 @@
-import React, { useEffect } from "react";
 import {
   Page,
   Text,
-  Image,
   Document,
   StyleSheet,
   View,
   Link,
 } from "@react-pdf/renderer";
-import { Grid } from "@mui/material";
 import { tableData } from "../pages/Slab/Slab";
 
 const style = StyleSheet.create({
@@ -65,9 +62,6 @@ const style = StyleSheet.create({
 });
 
 const PdfFile = ({ rowData, invoiceData }: any) => {
-  useEffect(() => {
-    console.log("inv:", invoiceData);
-  }, []);
 
   return (
     <Document>
@@ -118,7 +112,9 @@ const PdfFile = ({ rowData, invoiceData }: any) => {
                 <Text style={style.tableCellHead}>Measurement</Text>
               </View>
               <View style={style.tableCol}>
-                <Text style={style.tableCellHead}>Sq. Feet</Text>
+                <Text
+                  style={style.tableCellHead}
+                >{`Sq. ${invoiceData.totalAreaUnit}`}</Text>
               </View>
               <View style={style.tableCol}>
                 <Text style={style.tableCellHead}>Sr No</Text>
@@ -127,10 +123,12 @@ const PdfFile = ({ rowData, invoiceData }: any) => {
                 <Text style={style.tableCellHead}>Measurement</Text>
               </View>
               <View style={style.tableCol}>
-                <Text style={style.tableCellHead}>Sq. Feet</Text>
+                <Text
+                  style={style.tableCellHead}
+                >{`Sq. ${invoiceData.totalAreaUnit}`}</Text>
               </View>
             </View>
-            {rowData.slice(0, 35).map((d: tableData, i: number) => {
+            {rowData[0].rows.slice(0, 35).map((d: tableData, i: number) => {
               return (
                 <View style={style.tableRow}>
                   <View style={style.tableCol}>
@@ -142,19 +140,23 @@ const PdfFile = ({ rowData, invoiceData }: any) => {
                     </Text>
                   </View>
                   <View style={style.tableCol}>
-                    <Text style={style.tableCell}>{d?.sqMeter}</Text>
-                  </View>
-                  <View style={style.tableCol}>
-                    <Text style={style.tableCell}>{rowData[i + 35]?.srno}</Text>
+                    <Text style={style.tableCell}>{d?.area}</Text>
                   </View>
                   <View style={style.tableCol}>
                     <Text style={style.tableCell}>
-                      {rowData[i + 35]?.length + "X" + rowData[i + 35]?.width}
+                      {rowData[0].rows[i + 35]?.srno}
                     </Text>
                   </View>
                   <View style={style.tableCol}>
                     <Text style={style.tableCell}>
-                      {rowData[i + 35]?.sqMeter}
+                      {rowData[0].rows[i + 35]?.length +
+                        "X" +
+                        rowData[0].rows[i + 35]?.width}
+                    </Text>
+                  </View>
+                  <View style={style.tableCol}>
+                    <Text style={style.tableCell}>
+                      {rowData[0].rows[i + 35]?.area}
                     </Text>
                   </View>
                 </View>
@@ -172,12 +174,13 @@ const PdfFile = ({ rowData, invoiceData }: any) => {
           }}
         >
           <Text style={style.text}>
-            Sheet Sq. Feet: {invoiceData.totalSqFeet}
+            {`Sheet Sq. ${invoiceData.totalAreaUnit}: ` + rowData[0].pageTotal}
           </Text>
           <Text style={style.text}>
-            Price/Per Sq. Feet: Rs.{invoiceData.pricePerSqFeet}
+            {`Price/Per Sq. ${invoiceData.totalAreaUnit}: Rs.` +
+              invoiceData.pricePerSqFeet}
           </Text>
-          <Text style={style.text}>Sheet Cost: Rs.{invoiceData.totalCose}</Text>
+          <Text style={style.text}>Sheet Cost: Rs.{rowData[0].pageCost}</Text>
         </View>
         <View
           style={{
@@ -189,12 +192,120 @@ const PdfFile = ({ rowData, invoiceData }: any) => {
           }}
         >
           <Text style={style.text}>
-            Net Sq. Feet: {invoiceData.totalSqFeet}
+            {`Net Sq. ${invoiceData.totalAreaUnit}: ` + rowData[0].netTotal}
           </Text>
           <Text style={style.text}></Text>
-          <Text style={style.text}>Net Cost: Rs.{invoiceData.totalCose}</Text>
+          <Text style={style.text}>Net Cost: Rs.{rowData[0].netCost}</Text>
         </View>
       </Page>
+      {rowData.slice(1).map((row: any) => {
+        return (
+          <Page size={"A4"} style={{}}>
+            <View
+              style={{
+                marginRight: 50,
+                marginLeft: 50,
+                marginTop: 70,
+                marginBottom: 10,
+              }}
+            >
+              <View style={style.table}>
+                <View style={style.tableRow}>
+                  <View style={style.tableCol}>
+                    <Text style={style.tableCellHead}>Sr No</Text>
+                  </View>
+                  <View style={style.tableCol}>
+                    <Text style={style.tableCellHead}>Measurement</Text>
+                  </View>
+                  <View style={style.tableCol}>
+                    <Text style={style.tableCellHead}>
+                      {"Sq. " + invoiceData.totalAreaUnit}
+                    </Text>
+                  </View>
+                  <View style={style.tableCol}>
+                    <Text style={style.tableCellHead}>Sr No</Text>
+                  </View>
+                  <View style={style.tableCol}>
+                    <Text style={style.tableCellHead}>Measurement</Text>
+                  </View>
+                  <View style={style.tableCol}>
+                    <Text style={style.tableCellHead}>
+                      {"Sq. " + invoiceData.totalAreaUnit}
+                    </Text>
+                  </View>
+                </View>
+                {row.rows.slice(0, 35).map((d: tableData, i: number) => {
+                  return (
+                    <View style={style.tableRow}>
+                      <View style={style.tableCol}>
+                        <Text style={style.tableCell}>{d?.srno}</Text>
+                      </View>
+                      <View style={style.tableCol}>
+                        <Text style={style.tableCell}>
+                          {d?.length + "X" + d?.width}
+                        </Text>
+                      </View>
+                      <View style={style.tableCol}>
+                        <Text style={style.tableCell}>{d?.area}</Text>
+                      </View>
+                      <View style={style.tableCol}>
+                        <Text style={style.tableCell}>
+                          {row.rows[i + 35]?.srno}
+                        </Text>
+                      </View>
+                      <View style={style.tableCol}>
+                        <Text style={style.tableCell}>
+                          {row.rows[i + 35]?.length +
+                            "X" +
+                            row.rows[i + 35]?.width}
+                        </Text>
+                      </View>
+                      <View style={style.tableCol}>
+                        <Text style={style.tableCell}>
+                          {row.rows[i + 35]?.area}
+                        </Text>
+                      </View>
+                    </View>
+                  );
+                })}
+              </View>
+            </View>
+            <View
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "space-between",
+                marginRight: 50,
+                marginLeft: 50,
+              }}
+            >
+              <Text style={style.text}>
+                {`Sheet Sq. ${invoiceData.totalAreaUnit}: ` + row.pageTotal}
+              </Text>
+              <Text style={style.text}>
+                {`Price/Per Sq. ${invoiceData.totalAreaUnit}: Rs.` +
+                  invoiceData.pricePerSqFeet}
+              </Text>
+              <Text style={style.text}>Sheet Cost: Rs.{row.pageCost}</Text>
+            </View>
+            <View
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "space-between",
+                marginRight: 50,
+                marginLeft: 50,
+              }}
+            >
+              <Text style={style.text}>
+                {`Net Sq. ${invoiceData.totalAreaUnit}: ` + row.netTotal}
+              </Text>
+              <Text style={style.text}></Text>
+              <Text style={style.text}>Net Cost: Rs.{row.netCost}</Text>
+            </View>
+          </Page>
+        );
+      })}
     </Document>
   );
 };

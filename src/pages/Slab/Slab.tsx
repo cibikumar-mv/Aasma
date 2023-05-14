@@ -5,7 +5,6 @@ import {
   TextField,
   Paper,
   Box,
-  MenuItem,
   Button,
   TableContainer,
   TableHead,
@@ -13,7 +12,6 @@ import {
   TableCell,
   TableBody,
   Table,
-  InputBase,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -26,19 +24,13 @@ import {
   IconButton,
 } from "@mui/material";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import useExitPrompt from "../../hooks/useExitPrompt";
 import PdfFile from "../../components/PdfFile";
 import { PDFDownloadLink } from "@react-pdf/renderer";
-import {
-  ThemeProvider,
-  alpha,
-  createTheme,
-  styled,
-} from "@mui/material/styles";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
 import logo from "/src/assets/logo.png";
 import invoicePic from "/src/assets/invoicevector.png";
-import gridbg from "/src/assets/gridpattern2.png";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 
 const theme = createTheme({
@@ -54,32 +46,22 @@ const theme = createTheme({
   },
 });
 
-const measurementUnitValues = [
-  {
-    value: "Centimeter",
-  },
-  {
-    value: "Inches",
-  },
-  {
-    value: "Feet",
-  },
-];
-
-const totalAreaUnitValues = [
-  {
-    value: "Feet",
-    label: "Sq. Feet",
-  },
-  { value: "Meter", label: "Sq. Meter" },
-];
+enum Convert {
+  FeetToMeter = 0.09290304,
+  CmtoMeter = 0.0001,
+  InchToMeter = 0.00064516,
+  MeterToFeet = 1,
+  CmtoFeet = 0.00108,
+  InchToFeet = 0.00694,
+}
 
 export interface tableData {
   id: number;
   srno: number;
   length: string;
   width: string;
-  sqMeter: any;
+  sqFeet: any;
+  area: any;
   lInput: boolean;
   wInput: boolean;
 }
@@ -89,7 +71,8 @@ const obj: tableData = {
   srno: 1,
   length: "0",
   width: "0",
-  sqMeter: 0,
+  sqFeet: 0,
+  area: 0,
   lInput: false,
   wInput: false,
 };
@@ -105,7 +88,6 @@ const Slab = () => {
   const [showExitPrompt, setShowExitPrompt] = useExitPrompt(true);
   const [totalArea, settotalArea] = useState(0);
   const handleAddRow = (count: number | null) => {
-    console.log("asdf:", count);
     if (count) {
       if (isInitialAdd.current) {
         setRows(createRandomRow(count));
@@ -116,12 +98,11 @@ const Slab = () => {
       setRows(createRandomRow(-1));
       isInitialAdd.current = true;
       settotalArea(0);
-      setValue("pricePerSqFeet", "");
+      setValue("pricePerSqFeet", 0);
       setValue("startingRow", "");
-      setValue("addRows", "");
+      setValue("addRows", null);
     }
   };
-  const [areaUnit, setAreaUnit] = useState("Feet");
   const activeInput = useRef(-1);
   const {
     register,
@@ -129,20 +110,31 @@ const Slab = () => {
     watch,
     getValues,
     setValue,
+    control,
     formState: { errors },
-  } = useForm();
-  const watchPrice = watch("pricePerSqFeet");
-  const [data, setData] = useState({
-    partyName: "",
-    date: "",
-    quality: "",
-    vehicleNo: "",
-    measurementUnit: "",
-    maxSqFeet: "",
-    totalAreaUnit: "",
+  } = useForm({
+    defaultValues: {
+      partyName: "",
+      date: "",
+      quality: "",
+      vehicleNo: "",
+      addRows: null,
+      startingRow: "",
+      repeatCount: "",
+      totalSqFeet: 0,
+      pricePerSqFeet: 0,
+      totalCost: 0,
+      totalAreaUnit: "Feet",
+      measurementUnit: "feet",
+    },
   });
+  const watchPrice = watch("pricePerSqFeet");
+  const watchTotalAreaUnit = watch("totalAreaUnit");
+  const watchMeasurementUnit = watch("measurementUnit");
 
   useEffect(() => {
+    console.log("values:", getValues());
+
     const handleClickOutside = (event: any) => {
       if (ref.current && !ref.current.contains(event.target)) {
         setRows((prev) => {
@@ -163,6 +155,54 @@ const Slab = () => {
     };
   }, []);
 
+  useEffect(() => {
+    convertArea();
+  }, [watchTotalAreaUnit, watchMeasurementUnit]);
+
+  const convertArea = () => {
+    const aUnit = getValues("totalAreaUnit");
+    const mUnit = getValues("measurementUnit");
+    let area = 0;
+    setRows((prev) => {
+      switch (mUnit) {
+        case "centimeter":
+          prev.map((row) => {
+            if (!isNaN(row.sqFeet)) {
+              area =
+                row.sqFeet *
+                (aUnit === "Feet" ? Convert.CmtoFeet : Convert.CmtoMeter);
+              row.area = Math.round(area * 100) / 100;
+            }
+          });
+          break;
+        case "feet":
+          prev.map((row) => {
+            if (!isNaN(row.sqFeet)) {
+              area =
+                row.sqFeet *
+                (aUnit === "Feet" ? Convert.MeterToFeet : Convert.FeetToMeter);
+              row.area = Math.round(area * 100) / 100;
+            }
+          });
+          break;
+        case "inches":
+          prev.map((row) => {
+            if (!isNaN(row.sqFeet)) {
+              area =
+                row.sqFeet *
+                (aUnit === "Feet" ? Convert.InchToFeet : Convert.InchToMeter);
+              row.area = Math.round(area * 100) / 100;
+            }
+          });
+          break;
+        default:
+          break;
+      }
+      calculateTotalArea();
+      return [...prev];
+    });
+  };
+
   const createRandomRow = (count: number) => {
     if (count === -1) {
       idCounter.current = 0;
@@ -173,7 +213,6 @@ const Slab = () => {
     if (isInitialAdd.current) {
       const initialCount = getValues("startingRow");
       idCounter.current = initialCount ? parseInt(initialCount) - 1 : 0;
-      console.log("starting:", idCounter.current);
       isInitialAdd.current = false;
       for (let i = 0; i < count; i++) {
         idCounter.current += 1;
@@ -191,12 +230,7 @@ const Slab = () => {
   };
 
   const handleRepeatValues = () => {
-    let count = parseInt(getValues("repeateCount"));
-    console.log({
-      lastEdit: lastEditedIndex.current,
-      rowLen: rows.length,
-      count,
-    });
+    let count = parseInt(getValues("repeatCount"));
 
     count =
       count + (lastEditedIndex.current + 1) > rows.length
@@ -211,8 +245,10 @@ const Slab = () => {
           prev[lastEditedIndex.current].length;
         prev[lastEditedIndex.current + i].width =
           prev[lastEditedIndex.current].width;
-        prev[lastEditedIndex.current + i].sqMeter =
-          prev[lastEditedIndex.current].sqMeter;
+        prev[lastEditedIndex.current + i].area =
+          prev[lastEditedIndex.current].area;
+        prev[lastEditedIndex.current + i].sqFeet =
+          prev[lastEditedIndex.current].sqFeet;
       }
       return [...prev];
     });
@@ -226,19 +262,60 @@ const Slab = () => {
   const calculateTotalArea = () => {
     let total = 0;
     rows.forEach((row) => {
-      if (!isNaN(row.sqMeter)) {
-        total += row.sqMeter;
+      if (!isNaN(row.area)) {
+        total += row.area;
       }
     });
-    settotalArea(total);
+    settotalArea(Math.round(total * 100) / 100);
   };
 
-  const handleDownloadPDF = () => {
-    console.log("len:", rows.length, 70 - rows.length);
-    const padRows = createRandomRow(71 - rows.length);
-    console.log(rows.concat(padRows));
-    setPdfRows(rows.concat(padRows));
-    console.log("padRows:", padRows);
+  const handleDownloadPDF = (count: number) => {
+    let netTotal = 0;
+    let dataLen = rows.length;
+    const pageRows = [];
+    const pages = Math.ceil(count / 70);
+    for (let i = 0; i < pages; i++) {
+      let pageTotal = 0;
+      if (dataLen >= 70) {
+        dataLen = dataLen - 70;
+        rows.slice(i * 70, (i + 1) * 70).forEach((row) => {
+          if (!isNaN(row.area)) {
+            pageTotal += row.area;
+          }
+        });
+        netTotal = pageTotal + netTotal;
+        const obj = {
+          rows: rows.slice(i * 70, (i + 1) * 70),
+          pageTotal,
+          pageCost:
+            Math.round(getValues("pricePerSqFeet") * pageTotal * 100) / 100,
+          netTotal,
+          netCost:
+            Math.round(getValues("pricePerSqFeet") * netTotal * 100) / 100,
+        };
+        pageRows.push(obj);
+      } else {
+        const dataRows = rows.slice(dataLen * -1);
+        dataRows.forEach((row) => {
+          if (!isNaN(row.area)) {
+            pageTotal += row.area;
+          }
+        });
+        netTotal = pageTotal + netTotal;
+        const padRows = createRandomRow(71 - dataRows.length);
+        const obj = {
+          rows: dataRows.concat(padRows),
+          pageTotal,
+          pageCost:
+            Math.round(getValues("pricePerSqFeet") * pageTotal * 100) / 100,
+          netTotal,
+          netCost:
+            Math.round(getValues("pricePerSqFeet") * netTotal * 100) / 100,
+        };
+        pageRows.push(obj);
+      }
+    }
+    setPdfRows(pageRows);
     setShowPDF(true);
   };
 
@@ -302,86 +379,59 @@ const Slab = () => {
                   <FormLabel id="measurementUnitRadioLabel">
                     Measurement Unit
                   </FormLabel>
-                  <RadioGroup
-                    row
-                    aria-labelledby="measurementUnitRadioGroupLabel"
-                    name="measurementUnitRadioGroup"
-                  >
-                    <FormControlLabel
-                      value="centimeter"
-                      control={<Radio />}
-                      label="Centimeter"
-                    />
-                    <FormControlLabel
-                      value="inches"
-                      control={<Radio />}
-                      label="Inches"
-                    />
-                    <FormControlLabel
-                      value="feet"
-                      control={<Radio />}
-                      label="Feet"
-                    />
-                  </RadioGroup>
-                  {/* <TextField
-                    id="measurementUnit"
-                    select
+                  <Controller
                     name="measurementUnit"
-                    label="Measurement Unit"
-                    fullWidth
-                    variant="standard"
-                  >
-                    {measurementUnitValues.map((option) => (
-                      <MenuItem key={option.value} value={option.value}>
-                        {option.value}
-                      </MenuItem>
-                    ))}
-                    </TextField> */}
+                    control={control}
+                    render={({ field }) => (
+                      <RadioGroup {...field} sx={{ flexDirection: "row" }}>
+                        <FormControlLabel
+                          value="centimeter"
+                          control={<Radio />}
+                          label="Centimeter"
+                        />
+                        <FormControlLabel
+                          value="inches"
+                          control={<Radio />}
+                          label="Inches"
+                        />
+                        <FormControlLabel
+                          value="feet"
+                          control={<Radio />}
+                          label="Feet"
+                        />
+                      </RadioGroup>
+                    )}
+                  ></Controller>
                 </Grid>
 
-                <Grid item xs={12} sm={6}>
-                  <FormLabel id="totalAreaUnitRadioLabel">
-                    Total Area Unit
-                  </FormLabel>
-                  <RadioGroup
-                    row
-                    aria-labelledby="totalAreaUnitRadioGroupLabel"
-                    name="totalAreaUnitRadioGroup"
-                  >
-                    <FormControlLabel
-                      value="sqFeet"
-                      control={<Radio />}
-                      label="Sq. Feet"
-                    />
-                    <FormControlLabel
-                      value="sqMeter"
-                      control={<Radio />}
-                      label="Sq. Meter"
-                    />
-                  </RadioGroup>
-                  {/* <TextField
-                    id="totalAreaUnit"
-                    name="totalAreaUnit"
-                    select
-                    label="Total Area Unit"
-                    fullWidth
-                    variant="standard"
-                    onChange={(e: any) => {
-                      setAreaUnit(e.target.value);
-                    }}
-                  >
-                    {totalAreaUnitValues.map((option) => (
-                      <MenuItem key={option.value} value={option.value}>
-                        {option.label}
-                      </MenuItem>
-                    ))} 
-                  </TextField>*/}
-                </Grid>
+                <Controller
+                  name="totalAreaUnit"
+                  control={control}
+                  render={({ field }) => (
+                    <Grid item xs={12} sm={6}>
+                      <FormLabel id="totalAreaUnitRadioLabel">
+                        Total Area Unit
+                      </FormLabel>
+                      <RadioGroup {...field} sx={{ flexDirection: "row" }}>
+                        <FormControlLabel
+                          value="Feet"
+                          control={<Radio />}
+                          label="Sq. Feet"
+                        />
+                        <FormControlLabel
+                          value="Meter"
+                          control={<Radio />}
+                          label="Sq. Meter"
+                        />
+                      </RadioGroup>
+                    </Grid>
+                  )}
+                ></Controller>
                 <Grid item xs={12}>
                   <TextField
                     id="maxSqFeet"
                     name="maxSqFeet"
-                    label={"Max Sq " + areaUnit}
+                    label={"Max Sq " + watchTotalAreaUnit}
                     fullWidth
                     variant="standard"
                     type="number"
@@ -435,7 +485,7 @@ const Slab = () => {
                           <TableCell>Sr No</TableCell>
                           <TableCell>Length</TableCell>
                           <TableCell>Width</TableCell>
-                          <TableCell>{"Sq." + areaUnit}</TableCell>
+                          <TableCell>{"Sq. " + watchTotalAreaUnit}</TableCell>
                           <TableCell></TableCell>
                         </TableRow>
                       </TableHead>
@@ -463,18 +513,48 @@ const Slab = () => {
                                 <input
                                   autoFocus
                                   style={{ width: "50px" }}
-                                  value={row.length}
+                                  value={row.length === "0" ? "" : row.length}
                                   ref={ref}
                                   onChange={(e) => {
                                     lastEditedIndex.current = i;
                                     if (!/^\d*\.?\d*$/.test(e.target.value)) {
                                       return;
                                     }
+                                    const aUnit = getValues("totalAreaUnit");
+                                    const mUnit = getValues("measurementUnit");
                                     setRows((prev) => {
                                       prev[i].length = e.target.value;
-                                      prev[i].sqMeter =
+                                      prev[i].sqFeet =
                                         parseFloat(prev[i].length) *
                                         parseFloat(prev[i].width);
+                                      let area = 0;
+                                      switch (mUnit) {
+                                        case "centimeter":
+                                          area =
+                                            prev[i].sqFeet *
+                                            (aUnit === "Feet"
+                                              ? Convert.CmtoFeet
+                                              : Convert.CmtoMeter);
+                                          break;
+                                        case "feet":
+                                          area =
+                                            prev[i].sqFeet *
+                                            (aUnit === "Feet"
+                                              ? Convert.MeterToFeet
+                                              : Convert.FeetToMeter);
+                                          break;
+                                        case "inches":
+                                          area =
+                                            prev[i].sqFeet *
+                                            (aUnit === "Feet"
+                                              ? Convert.InchToFeet
+                                              : Convert.InchToMeter);
+                                          break;
+                                        default:
+                                          break;
+                                      }
+                                      prev[i].area =
+                                        Math.round(area * 100) / 100;
                                       calculateTotalArea();
                                       return [...prev];
                                     });
@@ -498,28 +578,58 @@ const Slab = () => {
                                   autoFocus
                                   style={{ width: "50px" }}
                                   ref={ref2}
-                                  value={row.width}
+                                  value={row.width === "0" ? "" : row.width}
                                   onChange={(e) => {
                                     lastEditedIndex.current = i;
                                     if (!/^\d*\.?\d*$/.test(e.target.value)) {
                                       return;
                                     }
+                                    const aUnit = getValues("totalAreaUnit");
+                                    const mUnit = getValues("measurementUnit");
+
                                     setRows((prev) => {
                                       prev[i].width = e.target.value;
-                                      prev[i].sqMeter =
+                                      prev[i].sqFeet =
                                         parseFloat(prev[i].length) *
                                         parseFloat(prev[i].width);
+                                      let area = 0;
+                                      switch (mUnit) {
+                                        case "centimeter":
+                                          area =
+                                            prev[i].sqFeet *
+                                            (aUnit === "Feet"
+                                              ? Convert.CmtoFeet
+                                              : Convert.CmtoMeter);
+                                          break;
+                                        case "feet":
+                                          area =
+                                            prev[i].sqFeet *
+                                            (aUnit === "Feet"
+                                              ? Convert.MeterToFeet
+                                              : Convert.FeetToMeter);
+                                          break;
+                                        case "inches":
+                                          area =
+                                            prev[i].sqFeet *
+                                            (aUnit === "Feet"
+                                              ? Convert.InchToFeet
+                                              : Convert.InchToMeter);
+                                          break;
+                                        default:
+                                          break;
+                                      }
+                                      prev[i].area =
+                                        Math.round(area * 100) / 100;
                                       calculateTotalArea();
                                       return [...prev];
                                     });
-                                    console.log("rows:", rows);
                                   }}
                                 />
                               ) : (
                                 row.width
                               )}
                             </TableCell>
-                            <TableCell>{row.sqMeter}</TableCell>
+                            <TableCell>{row.area}</TableCell>
                             <TableCell>
                               {i != 0 && (
                                 <div
@@ -528,7 +638,8 @@ const Slab = () => {
                                     setRows((prev) => {
                                       prev[i].width = "---- || ----";
                                       prev[i].length = "---- || ----";
-                                      prev[i].sqMeter = "---- || ----";
+                                      prev[i].area = "---- || ----";
+                                      prev[i].sqFeet = "---- || ----";
                                       calculateTotalArea();
                                       return [...prev];
                                     });
@@ -547,14 +658,14 @@ const Slab = () => {
                 <Grid item sm={12} md={12}>
                   <OutlinedInput
                     size="small"
-                    sx={{ width: 80, float: "right" }}
+                    sx={{ width: 90, float: "right" }}
                     id="outlined-adornment-password"
-                    {...register("repeateCount")}
+                    {...register("repeatCount")}
                     endAdornment={
                       <InputAdornment position="end">
                         <IconButton
                           aria-label="toggle password visibility"
-                          onClick={(e) => {
+                          onClick={() => {
                             handleRepeatValues();
                           }}
                           edge="end"
@@ -568,7 +679,7 @@ const Slab = () => {
                 <Grid item sm={12} md={4}>
                   <TextField
                     id="totalSqFeet"
-                    label="Total Sq. Feet"
+                    label={"Total Sq. " + watchTotalAreaUnit}
                     variant="standard"
                     type="number"
                     value={totalArea}
@@ -578,7 +689,7 @@ const Slab = () => {
                 <Grid item sm={12} md={4}>
                   <TextField
                     id="pricePerSqFeet"
-                    label="Price/Per Sq. Feet"
+                    label={"Price/Per Sq. " + watchTotalAreaUnit}
                     variant="standard"
                     type="number"
                     {...register("pricePerSqFeet")}
@@ -590,16 +701,23 @@ const Slab = () => {
                     label="Total Cost"
                     variant="standard"
                     type="number"
-                    value={watchPrice ? watchPrice * totalArea : 0}
+                    value={
+                      watchPrice
+                        ? Math.round(watchPrice * totalArea * 100) / 100
+                        : 0
+                    }
                     {...register("totalCost")}
                   />
                 </Grid>
                 <Grid item sm={12} md={8}>
                   <Button
+                    type="submit"
                     variant="outlined"
                     color="success"
                     fullWidth
-                    onClick={handleDownloadPDF}
+                    onClick={() => {
+                      handleDownloadPDF(rows.length);
+                    }}
                   >
                     Save as PDF
                   </Button>
