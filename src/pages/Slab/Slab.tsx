@@ -32,6 +32,7 @@ import { ThemeProvider, createTheme } from "@mui/material/styles";
 import logo from "/src/assets/logo.png";
 import invoicePic from "/src/assets/invoicevector.png";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import MediaQuery from "react-responsive";
 
 const theme = createTheme({
   palette: {
@@ -325,7 +326,7 @@ const Slab = () => {
 
   return (
     <Box
-      sx={{ width: "85%", margin: "auto", paddingBottom: 10, paddingTop: 10 }}
+      sx={{ width: "85%", margin: "auto", paddingBottom: 10, paddingTop: 5 }}
     >
       <Paper elevation={0} sx={{ padding: 5, borderRadius: 5 }}>
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -337,6 +338,22 @@ const Slab = () => {
           >
             <Grid item xs={12} sm={8}>
               <Grid container spacing={2}>
+                <MediaQuery maxWidth={1223}>
+                  <Grid item xs={12}>
+                    <center>
+                      <img src={logo} style={{ width: 60, height: 60 }} />
+                      <h2
+                        style={{
+                          marginTop: "5px",
+                          fontFamily: "Helvetica",
+                        }}
+                      >
+                        Aasma <br />
+                        Slab Measurements
+                      </h2>
+                    </center>
+                  </Grid>
+                </MediaQuery>
                 <Grid item xs={12} sm={6}>
                   <TextField
                     id="partyName"
@@ -764,37 +781,39 @@ const Slab = () => {
                 </Grid>
               </Grid>
             </Grid>
-            <Grid item xs={12} sm={4} marginBottom={0}>
-              <Paper
-                elevation={0}
-                sx={{
-                  paddingLeft: 0,
-                  paddingRight: 0,
-                  paddingTop: 10,
-                  paddingBottom: 12,
-                  borderRadius: 5,
-                  height: "100%",
-                  backgroundColor: "#f9f9fa",
-                }}
-              >
-                <center>
-                  <img src={logo} style={{ width: 60, height: 60 }} />
-                  <h2
-                    style={{
-                      marginTop: "5px",
-                      fontFamily: "Helvetica",
-                    }}
-                  >
-                    Aasma <br />
-                    Slab Measurements
-                  </h2>
-                  <img
-                    src={invoicePic}
-                    style={{ width: "100%", objectFit: "cover" }}
-                  />
-                </center>
-              </Paper>
-            </Grid>
+            <MediaQuery minWidth={1224}>
+              <Grid item xs={12} sm={4} marginBottom={0}>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    paddingLeft: 0,
+                    paddingRight: 0,
+                    paddingTop: 10,
+                    paddingBottom: 12,
+                    borderRadius: 5,
+                    height: "100%",
+                    backgroundColor: "#f9f9fa",
+                  }}
+                >
+                  <center>
+                    <img src={logo} style={{ width: 60, height: 60 }} />
+                    <h2
+                      style={{
+                        marginTop: "5px",
+                        fontFamily: "Helvetica",
+                      }}
+                    >
+                      Aasma <br />
+                      Slab Measurements
+                    </h2>
+                    <img
+                      src={invoicePic}
+                      style={{ width: "100%", objectFit: "cover" }}
+                    />
+                  </center>
+                </Paper>
+              </Grid>
+            </MediaQuery>
           </Grid>
         </form>
       </Paper>
