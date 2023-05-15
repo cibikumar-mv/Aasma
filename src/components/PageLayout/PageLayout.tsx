@@ -7,8 +7,6 @@ import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import MediaQuery from "react-responsive";
 
 const PageLayout = () => {
-  const url = "http://www.google.com";
-  const newWindow = window.open(url, "_blank", "noopener,noreferrer");
   return (
     <>
       {/*<nav></nav>*/}
@@ -26,8 +24,8 @@ const PageLayout = () => {
           <Fab
             style={{
               position: "fixed",
-              left: "95%",
-              bottom: "10%",
+              right: "10px",
+              bottom: "55px",
               marginRight: "30px",
 
               textAlign: "center",
@@ -44,8 +42,8 @@ const PageLayout = () => {
           <Fab
             style={{
               position: "fixed",
-              left: "80%",
-              bottom: "10%",
+              right: "10px",
+              bottom: "55px",
               marginRight: "30px",
 
               textAlign: "center",
