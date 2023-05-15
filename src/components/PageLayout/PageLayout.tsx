@@ -7,8 +7,6 @@ import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import MediaQuery from "react-responsive";
 
 const PageLayout = () => {
-  const url = "http://www.google.com";
-  const newWindow = window.open(url, "_blank", "noopener,noreferrer");
   return (
     <>
       {/*<nav></nav>*/}
