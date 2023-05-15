@@ -49,7 +49,9 @@ const PageLayout = () => {
               textAlign: "center",
             }}
             color="success"
-            aria-label="add"
+            href="https://www.google.com"
+            target="_blank"
+            rel="noopener noreferrer"
           >
             <WhatsAppIcon style={{ fontSize: "40px" }} />
           </Fab>

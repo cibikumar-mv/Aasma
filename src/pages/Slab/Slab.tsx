@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import "./Slab.scss";
 import {
   Grid,
@@ -39,11 +39,9 @@ import CloseIcon from "@mui/icons-material/Close";
 const theme = createTheme({
   palette: {
     primary: {
-      // Purple and green play nicely together.
       main: "#37CB95",
     },
     secondary: {
-      // This is green.A700 as hex.
       main: "#DE3C63",
     },
   },
@@ -81,6 +79,9 @@ const obj: tableData = {
 };
 
 const Slab = () => {
+  var curr = new Date();
+  curr.setDate(curr.getDate() + 0);
+  var curDate = curr.toISOString().substring(0, 10);
   const ref = useRef<any>(null);
   const ref2 = useRef<any>(null);
   const lastEditedIndex = useRef(-1);
@@ -90,6 +91,7 @@ const Slab = () => {
   const [pdfRows, setPdfRows] = useState<any>([]);
   const [showExitPrompt, setShowExitPrompt] = useExitPrompt(true);
   const [totalArea, settotalArea] = useState(0);
+
   const handleAddRow = (count: number | null) => {
     if (count) {
       if (isInitialAdd.current) {
@@ -110,6 +112,7 @@ const Slab = () => {
   const {
     register,
     handleSubmit,
+    reset,
     watch,
     getValues,
     setValue,
@@ -118,7 +121,7 @@ const Slab = () => {
   } = useForm({
     defaultValues: {
       partyName: "",
-      date: "",
+      date: curDate,
       quality: "",
       vehicleNo: "",
       addRows: null,
@@ -131,6 +134,7 @@ const Slab = () => {
       measurementUnit: "feet",
     },
   });
+
   const watchPrice = watch("pricePerSqFeet");
   const watchTotalAreaUnit = watch("totalAreaUnit");
   const watchMeasurementUnit = watch("measurementUnit");
@@ -328,9 +332,9 @@ const Slab = () => {
 
   return (
     <Box
-      sx={{ width: "85%", margin: "auto", paddingBottom: 10, paddingTop: 5 }}
+      sx={{ width: "85%", margin: "auto", paddingBottom: 10, paddingTop: 4 }}
     >
-      <Paper elevation={0} sx={{ padding: 5, borderRadius: 5 }}>
+      <Paper elevation={0} sx={{ padding: 3, borderRadius: 5 }}>
         <form onSubmit={handleSubmit(onSubmit)}>
           <Grid
             container
@@ -342,18 +346,28 @@ const Slab = () => {
               <Grid container spacing={2}>
                 <MediaQuery maxWidth={1223}>
                   <Grid item xs={12}>
-                    <center>
-                      <img src={logo} style={{ width: 60, height: 60 }} />
-                      <h2
-                        style={{
-                          marginTop: "5px",
-                          fontFamily: "Helvetica",
-                        }}
-                      >
-                        Aasma <br />
-                        Slab Measurements
-                      </h2>
-                    </center>
+                    <Paper
+                      elevation={0}
+                      sx={{
+                        borderRadius: 5,
+                        padding: 2,
+                        backgroundColor: "#f9f9fa",
+                      }}
+                    >
+                      <center>
+                        <img src={logo} style={{ width: 50, height: 50 }} />
+                        <h2
+                          style={{
+                            marginTop: "5px",
+                            marginBottom: 0,
+                            fontFamily: "Helvetica",
+                          }}
+                        >
+                          Aasma <br />
+                          Slab Measurements
+                        </h2>
+                      </center>
+                    </Paper>
                   </Grid>
                 </MediaQuery>
                 <Grid item xs={12} sm={6}>
@@ -449,7 +463,6 @@ const Slab = () => {
                 <Grid item xs={12}>
                   <TextField
                     id="maxSqFeet"
-                    name="maxSqFeet"
                     label={"Max Sq " + watchTotalAreaUnit}
                     fullWidth
                     variant="standard"
@@ -799,16 +812,18 @@ const Slab = () => {
                   </center>
                 </Dialog>
                 <Grid item sm={12} md={4}>
-                  <ThemeProvider theme={theme}>
-                    <Button
-                      disableElevation
-                      variant="contained"
-                      color="secondary"
-                      fullWidth
-                    >
-                      Reset Form
-                    </Button>
-                  </ThemeProvider>
+                  <Button
+                    disableElevation
+                    variant="contained"
+                    color="error"
+                    fullWidth
+                    onClick={() => {
+                      reset();
+                      handleAddRow(null);
+                    }}
+                  >
+                    Reset Form
+                  </Button>
                 </Grid>
               </Grid>
             </Grid>
