@@ -22,6 +22,7 @@ import {
   OutlinedInput,
   InputAdornment,
   IconButton,
+  Divider,
 } from "@mui/material";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 import { Controller, useForm } from "react-hook-form";
@@ -33,6 +34,7 @@ import logo from "/src/assets/logo.png";
 import invoicePic from "/src/assets/invoicevector.png";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import MediaQuery from "react-responsive";
+import CloseIcon from "@mui/icons-material/Close";
 
 const theme = createTheme({
   palette: {
@@ -751,28 +753,57 @@ const Slab = () => {
                   onClose={handleDialogClose}
                   aria-labelledby="alert-dialog-title"
                   aria-describedby="alert-dialog-description"
+                  style={{ borderRadius: 50 }}
+                  PaperProps={{
+                    style: { borderRadius: 15, width: "300px" },
+                  }}
                 >
-                  <DialogTitle>Download PDF</DialogTitle>
-                  <DialogContent>
-                    <PDFDownloadLink
-                      document={
-                        <PdfFile invoiceData={getValues()} rowData={pdfRows} />
-                      }
-                      fileName="slab"
-                    >
-                      {({ loading }) =>
-                        loading ? (
-                          <Button variant="outlined" color="success">
-                            Preparing...
-                          </Button>
-                        ) : (
-                          <Button variant="outlined" color="success">
-                            Download PDF
-                          </Button>
-                        )
-                      }
-                    </PDFDownloadLink>
-                  </DialogContent>
+                  <DialogTitle
+                    style={{ backgroundColor: "#f9f9fa" }}
+                    sx={{ m: 0, p: 2 }}
+                  >
+                    PDF Created!
+                    {handleDialogClose ? (
+                      <IconButton
+                        aria-label="close"
+                        onClick={handleDialogClose}
+                        sx={{
+                          position: "absolute",
+                          right: 8,
+                          top: 10,
+                          color: (theme) => theme.palette.grey[500],
+                        }}
+                      >
+                        <CloseIcon />
+                      </IconButton>
+                    ) : null}
+                  </DialogTitle>
+                  <Divider />
+                  <center>
+                    <DialogContent>
+                      <PDFDownloadLink
+                        document={
+                          <PdfFile
+                            invoiceData={getValues()}
+                            rowData={pdfRows}
+                          />
+                        }
+                        fileName="slab"
+                      >
+                        {({ loading }) =>
+                          loading ? (
+                            <Button variant="outlined" color="success">
+                              Preparing...
+                            </Button>
+                          ) : (
+                            <Button variant="outlined" color="success">
+                              Download PDF
+                            </Button>
+                          )
+                        }
+                      </PDFDownloadLink>
+                    </DialogContent>
+                  </center>
                 </Dialog>
                 <Grid item xs={12} md={4}>
                   <ThemeProvider theme={theme}>
