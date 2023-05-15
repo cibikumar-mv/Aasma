@@ -332,7 +332,7 @@ const Slab = () => {
 
   return (
     <Box
-      sx={{ width: "85%", margin: "auto", paddingBottom: 10, paddingTop: 4 }}
+      sx={{ width: "80%", margin: "auto", paddingBottom: 10, paddingTop: 4 }}
     >
       <Paper elevation={0} sx={{ padding: 3, borderRadius: 5 }}>
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -342,7 +342,7 @@ const Slab = () => {
             alignContent={"center"}
             alignItems={"center"}
           >
-            <Grid item xs={12} sm={8}>
+            <Grid item xs={12} lg={8}>
               <Grid container spacing={2}>
                 <MediaQuery maxWidth={1223}>
                   <Grid item xs={12}>
@@ -408,7 +408,7 @@ const Slab = () => {
                     {...register("vehicleNo")}
                   />
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={12} sm={5}>
                   <FormLabel id="measurementUnitRadioLabel">
                     Measurement Unit
                   </FormLabel>
@@ -437,30 +437,32 @@ const Slab = () => {
                   ></Controller>
                 </Grid>
 
-                <Controller
-                  name="totalAreaUnit"
-                  control={control}
-                  render={({ field }) => (
-                    <Grid item xs={12} sm={6}>
-                      <FormLabel id="totalAreaUnitRadioLabel">
-                        Total Area Unit
-                      </FormLabel>
-                      <RadioGroup {...field} sx={{ flexDirection: "row" }}>
-                        <FormControlLabel
-                          value="Feet"
-                          control={<Radio />}
-                          label="Sq. Feet"
-                        />
-                        <FormControlLabel
-                          value="Meter"
-                          control={<Radio />}
-                          label="Sq. Meter"
-                        />
-                      </RadioGroup>
-                    </Grid>
-                  )}
-                ></Controller>
-                <Grid item xs={12}>
+                <Grid item xs={12} sm={4}>
+                  <Controller
+                    name="totalAreaUnit"
+                    control={control}
+                    render={({ field }) => (
+                      <>
+                        <FormLabel id="totalAreaUnitRadioLabel">
+                          Total Area Unit
+                        </FormLabel>
+                        <RadioGroup {...field} sx={{ flexDirection: "row" }}>
+                          <FormControlLabel
+                            value="Feet"
+                            control={<Radio />}
+                            label="Sq. Feet"
+                          />
+                          <FormControlLabel
+                            value="Meter"
+                            control={<Radio />}
+                            label="Sq. Meter"
+                          />
+                        </RadioGroup>
+                      </>
+                    )}
+                  ></Controller>
+                </Grid>
+                <Grid item xs={12} sm={3} sx={{ marginTop: 1 }}>
                   <TextField
                     id="maxSqFeet"
                     label={"Max Sq " + watchTotalAreaUnit}
@@ -471,6 +473,7 @@ const Slab = () => {
                 </Grid>
                 <Grid item xs={12} sm={4}>
                   <TextField
+                    fullWidth
                     id="addRows"
                     label="Add Rows"
                     variant="standard"
@@ -480,6 +483,7 @@ const Slab = () => {
                 </Grid>
                 <Grid item xs={12} sm={4}>
                   <TextField
+                    fullWidth
                     id="startingRow"
                     label="Starting Row"
                     variant="standard"
@@ -687,7 +691,7 @@ const Slab = () => {
                     </Table>
                   </TableContainer>
                 </Grid>
-                <Grid item sm={12} md={12}>
+                <Grid item xs={12}>
                   <OutlinedInput
                     size="small"
                     sx={{ width: 90, float: "right" }}
@@ -708,8 +712,9 @@ const Slab = () => {
                     }
                   />
                 </Grid>
-                <Grid item sm={12} md={4}>
+                <Grid item xs={12} md={4}>
                   <TextField
+                    fullWidth
                     id="totalSqFeet"
                     label={"Total Sq. " + watchTotalAreaUnit}
                     variant="standard"
@@ -718,8 +723,9 @@ const Slab = () => {
                     {...register("totalSqFeet")}
                   />
                 </Grid>
-                <Grid item sm={12} md={4}>
+                <Grid item xs={12} md={4}>
                   <TextField
+                    fullWidth
                     id="pricePerSqFeet"
                     label={"Price/Per Sq. " + watchTotalAreaUnit}
                     variant="standard"
@@ -727,8 +733,9 @@ const Slab = () => {
                     {...register("pricePerSqFeet")}
                   />
                 </Grid>
-                <Grid item sm={12} md={4}>
+                <Grid item xs={12} md={4}>
                   <TextField
+                    fullWidth
                     id="totalCost"
                     label="Total Cost"
                     variant="standard"
@@ -741,7 +748,7 @@ const Slab = () => {
                     {...register("totalCost")}
                   />
                 </Grid>
-                <Grid item sm={12} md={8}>
+                <Grid item xs={12} md={8}>
                   <Button
                     type="submit"
                     variant="outlined"
@@ -811,7 +818,7 @@ const Slab = () => {
                     </DialogContent>
                   </center>
                 </Dialog>
-                <Grid item sm={12} md={4}>
+                <Grid item xs={12} md={4}>
                   <Button
                     disableElevation
                     variant="contained"

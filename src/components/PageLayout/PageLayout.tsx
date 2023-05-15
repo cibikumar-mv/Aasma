@@ -24,8 +24,8 @@ const PageLayout = () => {
           <Fab
             style={{
               position: "fixed",
-              left: "95%",
-              bottom: "10%",
+              right: "10px",
+              bottom: "55px",
               marginRight: "30px",
 
               textAlign: "center",
@@ -42,8 +42,8 @@ const PageLayout = () => {
           <Fab
             style={{
               position: "fixed",
-              left: "80%",
-              bottom: "10%",
+              right: "10px",
+              bottom: "55px",
               marginRight: "30px",
 
               textAlign: "center",
