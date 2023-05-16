@@ -5,8 +5,19 @@ import {
   StyleSheet,
   View,
   Link,
+  Font,
 } from "@react-pdf/renderer";
 import { tableData } from "../pages/Slab/Slab";
+
+Font.register({
+  family: "Roboto Regular",
+  src: "/src/assets/fonts/Roboto-Regular.tff",
+});
+
+Font.register({
+  family: "Roboto Bold",
+  src: "/src/assets/fonts/Roboto-Bold.ttf",
+});
 
 const style = StyleSheet.create({
   body: {
@@ -24,6 +35,12 @@ const style = StyleSheet.create({
     marginTop: 5,
     fontSize: 10,
     textAlign: "justify",
+  },
+  textBold: {
+    marginTop: 5,
+    fontSize: 10,
+    textAlign: "justify",
+    fontFamily: "Roboto Bold",
   },
   header: {
     fontSize: 12,
@@ -62,7 +79,6 @@ const style = StyleSheet.create({
 });
 
 const PdfFile = ({ rowData, invoiceData }: any) => {
-
   return (
     <Document>
       <Page size={"A4"} style={{}}>
@@ -197,6 +213,21 @@ const PdfFile = ({ rowData, invoiceData }: any) => {
           <Text style={style.text}></Text>
           <Text style={style.text}>Net Cost: Rs.{rowData[0].netCost}</Text>
         </View>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            marginRight: 50,
+            marginLeft: 50,
+            marginTop: 10,
+          }}
+        >
+          <Text />
+          <Text style={style.textBold}>
+            &copy; 2023 Aasma Slab Measurements. All rights reserved.
+          </Text>
+          <Text />
+        </View>
       </Page>
       {rowData.slice(1).map((row: any) => {
         return (
@@ -302,6 +333,21 @@ const PdfFile = ({ rowData, invoiceData }: any) => {
               </Text>
               <Text style={style.text}></Text>
               <Text style={style.text}>Net Cost: Rs.{row.netCost}</Text>
+            </View>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                marginRight: 50,
+                marginLeft: 50,
+                marginTop: 35,
+              }}
+            >
+              <Text />
+              <Text style={style.textBold}>
+                © 2023 Aasma Slab Measurements. All rights reserved.
+              </Text>
+              <Text />
             </View>
           </Page>
         );

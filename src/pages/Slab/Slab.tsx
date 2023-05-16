@@ -39,10 +39,10 @@ import CloseIcon from "@mui/icons-material/Close";
 const theme = createTheme({
   palette: {
     primary: {
-      main: "#37CB95",
+      main: "#13C9F1",
     },
     secondary: {
-      main: "#DE3C63",
+      main: "#FFA500",
     },
   },
 });
@@ -332,17 +332,17 @@ const Slab = () => {
 
   return (
     <Box
-      sx={{ width: "80%", margin: "auto", paddingBottom: 10, paddingTop: 4 }}
+      sx={{
+        width: "80%",
+        margin: "auto",
+        paddingBottom: 10,
+        paddingTop: 4,
+      }}
     >
       <Paper elevation={0} sx={{ padding: 3, borderRadius: 5 }}>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <Grid
-            container
-            spacing={3}
-            alignContent={"center"}
-            alignItems={"center"}
-          >
-            <Grid item xs={12} lg={8}>
+          <Grid container spacing={3} alignItems={"center"}>
+            <Grid item xs={12} lg={6}>
               <Grid container spacing={2}>
                 <MediaQuery maxWidth={1223}>
                   <Grid item xs={12}>
@@ -370,6 +370,39 @@ const Slab = () => {
                     </Paper>
                   </Grid>
                 </MediaQuery>
+                <Grid item xs={12} sm={1}>
+                  <img
+                    src={logo}
+                    style={{ width: 60, height: 60, margin: 0 }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={8}>
+                  <h2
+                    style={{
+                      marginLeft: 20,
+                      marginTop: 0,
+                      marginBottom: 5,
+                      fontFamily: "Helvetica",
+                      textAlign: "left",
+                    }}
+                  >
+                    Aasma <br />
+                    Slab Measurements
+                  </h2>
+                </Grid>
+                <Grid item xs={12}>
+                  <h1
+                    style={{
+                      fontFamily: "Arial",
+                      textAlign: "left",
+                      marginBottom: 5,
+                      marginTop: 0,
+                      fontWeight: "normal",
+                    }}
+                  >
+                    Slab Measurement Estimate
+                  </h1>
+                </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextField
                     id="partyName"
@@ -462,7 +495,7 @@ const Slab = () => {
                     )}
                   ></Controller>
                 </Grid>
-                <Grid item xs={12} sm={3} sx={{ marginTop: 1 }}>
+                <Grid item xs={12} sx={{ marginTop: 1 }}>
                   <TextField
                     id="maxSqFeet"
                     label={"Max Sq " + watchTotalAreaUnit}
@@ -492,26 +525,30 @@ const Slab = () => {
                   />
                 </Grid>
                 <Grid item xs={12} sm={2}>
-                  <Button
-                    variant="outlined"
-                    color="success"
-                    onClick={() => handleAddRow(getValues("addRows"))}
-                    style={{ marginTop: "12px" }}
-                    fullWidth
-                  >
-                    Add
-                  </Button>
+                  <ThemeProvider theme={theme}>
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      onClick={() => handleAddRow(getValues("addRows"))}
+                      style={{ marginTop: "12px", borderRadius: 20 }}
+                      fullWidth
+                    >
+                      Add
+                    </Button>
+                  </ThemeProvider>
                 </Grid>
                 <Grid item xs={12} sm={2}>
-                  <Button
-                    variant="outlined"
-                    color="error"
-                    onClick={() => handleAddRow(null)}
-                    style={{ marginTop: "12px" }}
-                    fullWidth
-                  >
-                    Reset
-                  </Button>
+                  <ThemeProvider theme={theme}>
+                    <Button
+                      variant="outlined"
+                      color="secondary"
+                      onClick={() => handleAddRow(null)}
+                      style={{ marginTop: "12px", borderRadius: 20 }}
+                      fullWidth
+                    >
+                      Reset
+                    </Button>
+                  </ThemeProvider>
                 </Grid>
                 <Grid item xs={12}>
                   <TableContainer component={Paper} sx={{ maxHeight: 440 }}>
@@ -749,17 +786,20 @@ const Slab = () => {
                   />
                 </Grid>
                 <Grid item xs={12} md={8}>
-                  <Button
-                    type="submit"
-                    variant="outlined"
-                    color="success"
-                    fullWidth
-                    onClick={() => {
-                      handleDownloadPDF(rows.length);
-                    }}
-                  >
-                    Save as PDF
-                  </Button>
+                  <ThemeProvider theme={theme}>
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      color="primary"
+                      fullWidth
+                      onClick={() => {
+                        handleDownloadPDF(rows.length);
+                      }}
+                      style={{ borderRadius: 20 }}
+                    >
+                      Save as PDF
+                    </Button>
+                  </ThemeProvider>
                 </Grid>
                 <Dialog
                   open={showPDF}
@@ -819,23 +859,26 @@ const Slab = () => {
                   </center>
                 </Dialog>
                 <Grid item xs={12} md={4}>
-                  <Button
-                    disableElevation
-                    variant="contained"
-                    color="error"
-                    fullWidth
-                    onClick={() => {
-                      reset();
-                      handleAddRow(null);
-                    }}
-                  >
-                    Reset Form
-                  </Button>
+                  <ThemeProvider theme={theme}>
+                    <Button
+                      disableElevation
+                      variant="contained"
+                      color="secondary"
+                      fullWidth
+                      onClick={() => {
+                        reset();
+                        handleAddRow(null);
+                      }}
+                      style={{ borderRadius: 20 }}
+                    >
+                      Reset Form
+                    </Button>
+                  </ThemeProvider>
                 </Grid>
               </Grid>
             </Grid>
             <MediaQuery minWidth={1224}>
-              <Grid item xs={12} sm={4} marginBottom={0}>
+              <Grid item xs={12} lg={6} marginBottom={0}>
                 <Paper
                   elevation={0}
                   sx={{
@@ -845,20 +888,10 @@ const Slab = () => {
                     paddingBottom: 12,
                     borderRadius: 5,
                     height: "100%",
-                    backgroundColor: "#f9f9fa",
+                    backgroundColor: "#ffffff",
                   }}
                 >
                   <center>
-                    <img src={logo} style={{ width: 60, height: 60 }} />
-                    <h2
-                      style={{
-                        marginTop: "5px",
-                        fontFamily: "Helvetica",
-                      }}
-                    >
-                      Aasma <br />
-                      Slab Measurements
-                    </h2>
                     <img
                       src={invoicePic}
                       style={{ width: "100%", objectFit: "cover" }}
