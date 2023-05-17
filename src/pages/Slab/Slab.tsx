@@ -118,31 +118,24 @@ const Slab = () => {
   };
   const activeInput = useRef(-1);
   const showMaxAlert = useRef(true);
-  const {
-    register,
-    handleSubmit,
-    reset,
-    watch,
-    getValues,
-    setValue,
-    control,
-  } = useForm({
-    defaultValues: {
-      partyName: "",
-      date: curDate,
-      quality: "",
-      vehicleNo: "",
-      addRows: null,
-      startingRow: "",
-      repeatCount: "",
-      totalSqFeet: 0,
-      pricePerSqFeet: 0,
-      totalCost: 0,
-      totalAreaUnit: "Feet",
-      measurementUnit: "feet",
-      maxSqFeet: "",
-    },
-  });
+  const { register, handleSubmit, reset, watch, getValues, setValue, control } =
+    useForm({
+      defaultValues: {
+        partyName: "",
+        date: curDate,
+        quality: "",
+        vehicleNo: "",
+        addRows: null,
+        startingRow: "",
+        repeatCount: "",
+        totalSqFeet: 0,
+        pricePerSqFeet: 0,
+        totalCost: 0,
+        totalAreaUnit: "Feet",
+        measurementUnit: "feet",
+        maxSqFeet: "",
+      },
+    });
 
   const watchPrice = watch("pricePerSqFeet");
   const watchTotalAreaUnit = watch("totalAreaUnit");
@@ -381,14 +374,13 @@ const Slab = () => {
                     <h2
                       style={{
                         marginLeft: 20,
-                        marginTop: 0,
+                        marginTop: 3,
                         marginBottom: 5,
                         fontFamily: "Helvetica",
                         textAlign: "left",
                       }}
                     >
-                      Aasma <br />
-                      Slab Measurements
+                      Aasma Technology <br /> Solutions
                     </h2>
                   </div>
                 </Grid>
@@ -416,10 +408,10 @@ const Slab = () => {
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
+                  <label>Date</label>
                   <TextField
                     id="date"
                     type="date"
-                    label="Date"
                     fullWidth
                     variant="standard"
                     InputProps={{
@@ -432,27 +424,27 @@ const Slab = () => {
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
+                  <label>Quality</label>
                   <TextField
                     id="quality"
-                    label="Quality"
+                    placeholder="Enter quality"
                     fullWidth
                     variant="standard"
                     {...register("quality")}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
+                  <label>Vehicle No</label>
                   <TextField
                     id="vehicleNo"
-                    label="Vehicle No"
+                    placeholder="Enter vehicle no"
                     fullWidth
                     variant="standard"
                     {...register("vehicleNo")}
                   />
                 </Grid>
                 <Grid item xs={12} sm={7}>
-                  <FormLabel id="measurementUnitRadioLabel">
-                    Measurement Unit
-                  </FormLabel>
+                  <label>Measurement Unit</label>
                   <Controller
                     name="measurementUnit"
                     control={control}
@@ -484,9 +476,7 @@ const Slab = () => {
                     control={control}
                     render={({ field }) => (
                       <>
-                        <FormLabel id="totalAreaUnitRadioLabel">
-                          Total Area Unit
-                        </FormLabel>
+                        <label>Total Area Unit</label>
                         <RadioGroup {...field} sx={{ flexDirection: "row" }}>
                           <FormControlLabel
                             value="Feet"
@@ -504,9 +494,10 @@ const Slab = () => {
                   ></Controller>
                 </Grid>
                 <Grid item xs={12} sx={{ marginTop: 1 }}>
+                  <label>{"Max Sq." + watchTotalAreaUnit}</label>
                   <TextField
                     id="maxSqFeet"
-                    label={"Max Sq " + watchTotalAreaUnit}
+                    placeholder={"Enter Max Sq " + watchTotalAreaUnit}
                     fullWidth
                     variant="standard"
                     type="number"
@@ -514,10 +505,11 @@ const Slab = () => {
                   />
                 </Grid>
                 <Grid item xs={12} sm={4}>
+                  <label>Add Rows</label>
                   <TextField
                     fullWidth
                     id="addRows"
-                    label="Add Rows"
+                    placeholder="Enter no of rows"
                     helperText="Max 700 rows"
                     variant="standard"
                     type="number"
@@ -525,10 +517,11 @@ const Slab = () => {
                   />
                 </Grid>
                 <Grid item xs={12} sm={4}>
+                  <label>Starting Row</label>
                   <TextField
                     fullWidth
                     id="startingRow"
-                    label="Starting Row"
+                    placeholder="Enter starting row"
                     variant="standard"
                     type="number"
                     {...register("startingRow")}
@@ -760,10 +753,10 @@ const Slab = () => {
                   />
                 </Grid>
                 <Grid item xs={12} md={4}>
+                  <label>{"Total Sq. " + watchTotalAreaUnit}</label>
                   <TextField
                     fullWidth
                     id="totalSqFeet"
-                    label={"Total Sq. " + watchTotalAreaUnit}
                     variant="standard"
                     type="number"
                     value={totalArea}
@@ -771,20 +764,20 @@ const Slab = () => {
                   />
                 </Grid>
                 <Grid item xs={12} md={4}>
+                  <label>{"Price/Per Sq. " + watchTotalAreaUnit}</label>
                   <TextField
                     fullWidth
                     id="pricePerSqFeet"
-                    label={"Price/Per Sq. " + watchTotalAreaUnit}
                     variant="standard"
                     type="number"
                     {...register("pricePerSqFeet")}
                   />
                 </Grid>
                 <Grid item xs={12} md={4}>
+                  <label>Total Cost</label>
                   <TextField
                     fullWidth
                     id="totalCost"
-                    label="Total Cost"
                     variant="standard"
                     type="number"
                     value={
@@ -855,13 +848,25 @@ const Slab = () => {
                       >
                         {({ loading }) =>
                           loading ? (
-                            <Button variant="outlined" color="success">
-                              Preparing...
-                            </Button>
+                            <ThemeProvider theme={theme}>
+                              <Button
+                                variant="contained"
+                                color="primary"
+                                style={{ borderRadius: 20 }}
+                              >
+                                Preparing...
+                              </Button>
+                            </ThemeProvider>
                           ) : (
-                            <Button variant="outlined" color="success">
-                              Download PDF
-                            </Button>
+                            <ThemeProvider theme={theme}>
+                              <Button
+                                variant="contained"
+                                color="primary"
+                                style={{ borderRadius: 20 }}
+                              >
+                                Download PDF
+                              </Button>
+                            </ThemeProvider>
                           )
                         }
                       </PDFDownloadLink>

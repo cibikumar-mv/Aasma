@@ -80,9 +80,10 @@ const style = StyleSheet.create({
     fontSize: 10,
   },
   footer: {
-    marginTop: 60,
+    marginTop: 55,
     fontSize: 10,
     textAlign: "justify",
+    fontFamily: "Roboto Bold",
   },
 });
 
@@ -205,14 +206,18 @@ const PdfFile = ({ rowData, invoiceData }: any) => {
             marginLeft: 50,
           }}
         >
-          <Text style={style.text}>
-            {`Sheet Sq. ${invoiceData.totalAreaUnit}: ` + rowData[0].pageTotal}
+          <Text style={style.textBold}>
+            {`Sheet Sq. ${invoiceData.totalAreaUnit}: `}
+            <Text style={style.text}>{rowData[0].pageTotal}</Text>
           </Text>
-          <Text style={style.text}>
-            {`Price/Per Sq. ${invoiceData.totalAreaUnit}: Rs.` +
-              invoiceData.pricePerSqFeet}
+          <Text style={style.textBold}>
+            {`Price/Per Sq. ${invoiceData.totalAreaUnit}: `}
+            <Text style={style.text}>{"Rs." + invoiceData.pricePerSqFeet}</Text>
           </Text>
-          <Text style={style.text}>Sheet Cost: Rs.{rowData[0].pageCost}</Text>
+          <Text style={style.textBold}>
+            {"Sheet Cost: "}
+            <Text style={style.text}>Rs.{rowData[0].pageCost}</Text>
+          </Text>
         </View>
         <View
           style={{
@@ -223,11 +228,15 @@ const PdfFile = ({ rowData, invoiceData }: any) => {
             marginLeft: 50,
           }}
         >
-          <Text style={style.text}>
-            {`Net Sq. ${invoiceData.totalAreaUnit}: ` + rowData[0].netTotal}
+          <Text style={style.textBold}>
+            {`Net Sq. ${invoiceData.totalAreaUnit}: `}
+            <Text style={style.text}>{rowData[0].netTotal}</Text>
           </Text>
           <Text style={style.text}></Text>
-          <Text style={style.text}>Net Cost: Rs.{rowData[0].netCost}</Text>
+          <Text style={style.textBold}>
+            {"Net Cost: "}
+            <Text style={style.text}> Rs.{rowData[0].netCost} </Text>
+          </Text>
         </View>
         <View
           style={{
@@ -240,11 +249,10 @@ const PdfFile = ({ rowData, invoiceData }: any) => {
           }}
         >
           <Text style={style.footer}>
-            © 2023&nbsp;
             <Link src="https://aasmatechin.netlify.app/">
               Aasma Technologies solutions.
             </Link>
-            &nbsp;All rights reserved.
+            &nbsp; © 2023 - All rights reserved.
           </Text>
         </View>
       </Page>
@@ -329,14 +337,20 @@ const PdfFile = ({ rowData, invoiceData }: any) => {
                 marginLeft: 50,
               }}
             >
-              <Text style={style.text}>
-                {`Sheet Sq. ${invoiceData.totalAreaUnit}: ` + row.pageTotal}
+              <Text style={style.textBold}>
+                {`Sheet Sq. ${invoiceData.totalAreaUnit}: `}
+                <Text style={style.text}>{row.pageTotal} </Text>
               </Text>
-              <Text style={style.text}>
-                {`Price/Per Sq. ${invoiceData.totalAreaUnit}: Rs.` +
-                  invoiceData.pricePerSqFeet}
+              <Text style={style.textBold}>
+                {`Price/Per Sq. ${invoiceData.totalAreaUnit}: `}
+                <Text style={style.text}>
+                  {"Rs." + invoiceData.pricePerSqFeet}
+                </Text>
               </Text>
-              <Text style={style.text}>Sheet Cost: Rs.{row.pageCost}</Text>
+              <Text style={style.textBold}>
+                {"Sheet Cost: "}
+                <Text style={style.text}>{"Rs." + row.pageCost} </Text>
+              </Text>
             </View>
             <View
               style={{
@@ -347,11 +361,15 @@ const PdfFile = ({ rowData, invoiceData }: any) => {
                 marginLeft: 50,
               }}
             >
-              <Text style={style.text}>
-                {`Net Sq. ${invoiceData.totalAreaUnit}: ` + row.netTotal}
+              <Text style={style.textBold}>
+                {`Net Sq. ${invoiceData.totalAreaUnit}: `}
+                <Text style={style.text}>{row.netTotal}</Text>
               </Text>
               <Text style={style.text}></Text>
-              <Text style={style.text}>Net Cost: Rs.{row.netCost}</Text>
+              <Text style={style.textBold}>
+                {"Net Cost: "}
+                <Text style={style.text}>{"Rs." + row.netCost}</Text>
+              </Text>
             </View>
             <View
               style={{
@@ -359,16 +377,15 @@ const PdfFile = ({ rowData, invoiceData }: any) => {
                 justifyContent: "center",
                 marginRight: 50,
                 marginLeft: 50,
-                marginTop: 40,
+                marginTop: 45,
                 alignItems: "center",
               }}
             >
               <Text style={style.footer}>
-                © 2023&nbsp;
                 <Link src="https://aasmatechin.netlify.app/">
-                  Aasma Technologies solutions.
+                  Aasma Technologies solutions
                 </Link>
-                &nbsp;All rights reserved.
+                &nbsp; © 2023 - All rights reserved.
               </Text>
             </View>
           </Page>
