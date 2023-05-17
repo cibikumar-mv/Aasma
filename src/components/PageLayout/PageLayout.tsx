@@ -1,7 +1,5 @@
 import { Outlet } from "react-router-dom";
 import "./PageLayout.scss";
-import SideNav from "../SideNav/SideNav";
-import logo from "/src/assets/logo.jpeg";
 import { Fab } from "@mui/material";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import MediaQuery from "react-responsive";
@@ -24,14 +22,14 @@ const PageLayout = () => {
           <Fab
             style={{
               position: "fixed",
-              right: "10px",
+              right: "-15px",
               bottom: "55px",
               marginRight: "30px",
 
               textAlign: "center",
             }}
             color="success"
-            href="https://www.google.com"
+            href="http://api.whatsapp.com/send?phone=+917802813843&text=Slab%20Measurement%20Estimate"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -42,14 +40,14 @@ const PageLayout = () => {
           <Fab
             style={{
               position: "fixed",
-              right: "10px",
+              right: "-25px",
               bottom: "55px",
               marginRight: "30px",
 
               textAlign: "center",
             }}
             color="success"
-            href="https://www.google.com"
+            href="http://api.whatsapp.com/send?phone=+917802813843&text=Slab%20Measurement%20Estimate"
             target="_blank"
             rel="noopener noreferrer"
           >

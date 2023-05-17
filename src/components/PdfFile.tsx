@@ -8,15 +8,17 @@ import {
   Font,
 } from "@react-pdf/renderer";
 import { tableData } from "../pages/Slab/Slab";
+import roboRegular from "/src/assets/fonts/Roboto-Regular.ttf";
+import roboBold from "/src/assets/fonts/Roboto-Bold.ttf";
 
 Font.register({
   family: "Roboto Regular",
-  src: "/src/assets/fonts/Roboto-Regular.tff",
+  src: roboRegular,
 });
 
 Font.register({
   family: "Roboto Bold",
-  src: "/src/assets/fonts/Roboto-Bold.ttf",
+  src: roboBold,
 });
 
 const style = StyleSheet.create({
@@ -35,6 +37,7 @@ const style = StyleSheet.create({
     marginTop: 5,
     fontSize: 10,
     textAlign: "justify",
+    fontFamily: "Roboto Regular",
   },
   textBold: {
     marginTop: 5,
@@ -76,6 +79,11 @@ const style = StyleSheet.create({
     marginTop: 5,
     fontSize: 10,
   },
+  footer: {
+    marginTop: 60,
+    fontSize: 10,
+    textAlign: "justify",
+  },
 });
 
 const PdfFile = ({ rowData, invoiceData }: any) => {
@@ -83,7 +91,7 @@ const PdfFile = ({ rowData, invoiceData }: any) => {
     <Document>
       <Page size={"A4"} style={{}}>
         <Link style={style.title} src="http://127.0.0.1:5173/">
-          Aasma Slab Measurements
+          SLAB MEASUREMENT ESTIMATE
         </Link>
         <View
           style={{
@@ -94,8 +102,13 @@ const PdfFile = ({ rowData, invoiceData }: any) => {
             marginLeft: 50,
           }}
         >
-          <Text style={style.text}>Name of Party: {invoiceData.partyName}</Text>
-          <Text style={style.text}>Date: {invoiceData.date}</Text>
+          <Text style={style.textBold}>
+            Name of Party:{" "}
+            <Text style={style.text}>{invoiceData.partyName}</Text>
+          </Text>
+          <Text style={style.textBold}>
+            Date: <Text style={style.text}>{invoiceData.date}</Text>
+          </Text>
         </View>
         <View
           style={{
@@ -106,9 +119,12 @@ const PdfFile = ({ rowData, invoiceData }: any) => {
             marginLeft: 50,
           }}
         >
-          <Text style={style.text}>Quality: {invoiceData.quality}</Text>
-          <Text style={style.text}>
-            Vehicle Number: {invoiceData.vehicleNo}
+          <Text style={style.textBold}>
+            Quality: <Text style={style.text}>{invoiceData.quality}</Text>
+          </Text>
+          <Text style={style.textBold}>
+            Vehicle Number:{" "}
+            <Text style={style.text}>{invoiceData.vehicleNo}</Text>
           </Text>
         </View>
         <View
@@ -216,17 +232,20 @@ const PdfFile = ({ rowData, invoiceData }: any) => {
         <View
           style={{
             flexDirection: "row",
-            justifyContent: "space-between",
+            justifyContent: "center",
             marginRight: 50,
             marginLeft: 50,
             marginTop: 10,
+            alignItems: "center",
           }}
         >
-          <Text />
-          <Text style={style.textBold}>
-            &copy; 2023 Aasma Slab Measurements. All rights reserved.
+          <Text style={style.footer}>
+            © 2023&nbsp;
+            <Link src="https://aasmatechin.netlify.app/">
+              Aasma Technologies solutions.
+            </Link>
+            &nbsp;All rights reserved.
           </Text>
-          <Text />
         </View>
       </Page>
       {rowData.slice(1).map((row: any) => {
@@ -337,17 +356,20 @@ const PdfFile = ({ rowData, invoiceData }: any) => {
             <View
               style={{
                 flexDirection: "row",
-                justifyContent: "space-between",
+                justifyContent: "center",
                 marginRight: 50,
                 marginLeft: 50,
-                marginTop: 35,
+                marginTop: 40,
+                alignItems: "center",
               }}
             >
-              <Text />
-              <Text style={style.textBold}>
-                © 2023 Aasma Slab Measurements. All rights reserved.
+              <Text style={style.footer}>
+                © 2023&nbsp;
+                <Link src="https://aasmatechin.netlify.app/">
+                  Aasma Technologies solutions.
+                </Link>
+                &nbsp;All rights reserved.
               </Text>
-              <Text />
             </View>
           </Page>
         );

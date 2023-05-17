@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import "./Slab.scss";
 import {
   Grid,
@@ -24,7 +24,6 @@ import {
   IconButton,
   Divider,
 } from "@mui/material";
-import { DateField } from "@mui/x-date-pickers/DateField";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 import { Controller, useForm } from "react-hook-form";
 import useExitPrompt from "../../hooks/useExitPrompt";
@@ -80,9 +79,9 @@ const obj: tableData = {
 };
 
 const Slab = () => {
-  var curr = new Date();
+  const curr = new Date();
   curr.setDate(curr.getDate() + 0);
-  var curDate = curr.toISOString().substring(0, 10);
+  const curDate = curr.toISOString().substring(0, 10);
   const ref = useRef<any>(null);
   const ref2 = useRef<any>(null);
   const lastEditedIndex = useRef(-1);
@@ -90,26 +89,35 @@ const Slab = () => {
   const [showPDF, setShowPDF] = useState(false);
   const isInitialAdd = useRef(true);
   const [pdfRows, setPdfRows] = useState<any>([]);
-  const [showExitPrompt, setShowExitPrompt] = useExitPrompt(true);
+  const [setShowExitPrompt] = useExitPrompt(true);
   const [totalArea, settotalArea] = useState(0);
 
-  const handleAddRow = (count: number | null) => {
+  const handleAddRow = (count: any | null) => {
     if (count) {
+      console.log(rows.length + count, rows.length, count);
+
+      if (rows.length + parseInt(count) > 701) {
+        alert("Maximum limit of 700 reached");
+        return;
+      }
       if (isInitialAdd.current) {
         setRows(createRandomRow(count));
       } else {
         setRows((prevRows) => [...prevRows, ...createRandomRow(count)]);
       }
     } else {
+      setShowExitPrompt(true);
       setRows(createRandomRow(-1));
       isInitialAdd.current = true;
       settotalArea(0);
       setValue("pricePerSqFeet", 0);
       setValue("startingRow", "");
       setValue("addRows", null);
+      showMaxAlert.current = true;
     }
   };
   const activeInput = useRef(-1);
+  const showMaxAlert = useRef(true);
   const {
     register,
     handleSubmit,
@@ -118,7 +126,6 @@ const Slab = () => {
     getValues,
     setValue,
     control,
-    formState: { errors },
   } = useForm({
     defaultValues: {
       partyName: "",
@@ -133,6 +140,7 @@ const Slab = () => {
       totalCost: 0,
       totalAreaUnit: "Feet",
       measurementUnit: "feet",
+      maxSqFeet: "",
     },
   });
 
@@ -274,10 +282,29 @@ const Slab = () => {
         total += row.area;
       }
     });
+    console.log("test:", parseFloat(getValues("maxSqFeet")) * 0.9, total);
+    console.log(
+      "test:",
+      showMaxAlert.current,
+      total >= parseFloat(getValues("maxSqFeet")) * 0.9
+    );
+
+    if (
+      showMaxAlert.current &&
+      total >= parseFloat(getValues("maxSqFeet")) * 0.9
+    ) {
+      // setShowAlert(true);
+      alert("Total sq feet reaches near to your limit!");
+      showMaxAlert.current = false;
+    }
     settotalArea(Math.round(total * 100) / 100);
   };
 
   const handleDownloadPDF = (count: number) => {
+    if (rows.length === 1 && rows[0].length === "0" && rows[0].width === "0") {
+      alert("Please fill atleast 1 record");
+      return;
+    }
     let netTotal = 0;
     let dataLen = rows.length;
     const pageRows = [];
@@ -294,10 +321,10 @@ const Slab = () => {
         netTotal = pageTotal + netTotal;
         const obj = {
           rows: rows.slice(i * 70, (i + 1) * 70),
-          pageTotal,
+          pageTotal: Math.round(pageTotal * 100) / 100,
           pageCost:
             Math.round(getValues("pricePerSqFeet") * pageTotal * 100) / 100,
-          netTotal,
+          netTotal: Math.round(netTotal * 100) / 100,
           netCost:
             Math.round(getValues("pricePerSqFeet") * netTotal * 100) / 100,
         };
@@ -313,10 +340,10 @@ const Slab = () => {
         const padRows = createRandomRow(71 - dataRows.length);
         const obj = {
           rows: dataRows.concat(padRows),
-          pageTotal,
+          pageTotal: Math.round(pageTotal * 100) / 100,
           pageCost:
             Math.round(getValues("pricePerSqFeet") * pageTotal * 100) / 100,
-          netTotal,
+          netTotal: Math.round(netTotal * 100) / 100,
           netCost:
             Math.round(getValues("pricePerSqFeet") * netTotal * 100) / 100,
         };
@@ -337,59 +364,33 @@ const Slab = () => {
         width: "80%",
         margin: "auto",
         paddingBottom: 10,
-        paddingTop: 4,
+        paddingTop: 1,
       }}
     >
-      <Paper elevation={0} sx={{ padding: 3, borderRadius: 5 }}>
+      <Paper elevation={0} sx={{ padding: 1, borderRadius: 5 }}>
         <form onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} alignItems={"center"}>
             <Grid item xs={12} lg={6}>
               <Grid container spacing={2}>
-                <MediaQuery maxWidth={1223}>
-                  <Grid item xs={12}>
-                    <Paper
-                      elevation={0}
-                      sx={{
-                        borderRadius: 5,
-                        padding: 2,
-                        backgroundColor: "#f9f9fa",
+                <Grid item xs={12} pb={5}>
+                  <div style={{ display: "flex" }}>
+                    <img
+                      src={logo}
+                      style={{ width: 60, height: 60, margin: 0 }}
+                    />
+                    <h2
+                      style={{
+                        marginLeft: 20,
+                        marginTop: 0,
+                        marginBottom: 5,
+                        fontFamily: "Helvetica",
+                        textAlign: "left",
                       }}
                     >
-                      <center>
-                        <img src={logo} style={{ width: 50, height: 50 }} />
-                        <h2
-                          style={{
-                            marginTop: "5px",
-                            marginBottom: 0,
-                            fontFamily: "Helvetica",
-                          }}
-                        >
-                          Aasma <br />
-                          Slab Measurements
-                        </h2>
-                      </center>
-                    </Paper>
-                  </Grid>
-                </MediaQuery>
-                <Grid item xs={12} sm={1}>
-                  <img
-                    src={logo}
-                    style={{ width: 60, height: 60, margin: 0 }}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={8}>
-                  <h2
-                    style={{
-                      marginLeft: 20,
-                      marginTop: 0,
-                      marginBottom: 5,
-                      fontFamily: "Helvetica",
-                      textAlign: "left",
-                    }}
-                  >
-                    Aasma <br />
-                    Slab Measurements
-                  </h2>
+                      Aasma <br />
+                      Slab Measurements
+                    </h2>
+                  </div>
                 </Grid>
                 <Grid item xs={12}>
                   <h1
@@ -405,9 +406,10 @@ const Slab = () => {
                   </h1>
                 </Grid>
                 <Grid item xs={12} sm={6}>
+                  <label>Party Name</label>
                   <TextField
                     id="partyName"
-                    label="Party name"
+                    placeholder="Enter Party Name"
                     fullWidth
                     variant="standard"
                     {...register("partyName")}
@@ -420,7 +422,11 @@ const Slab = () => {
                     label="Date"
                     fullWidth
                     variant="standard"
-                    inputProps={{ max: "17-05-2023" }}
+                    InputProps={{
+                      inputProps: {
+                        max: new Date().toISOString().slice(0, 10),
+                      },
+                    }}
                     InputLabelProps={{ shrink: true }}
                     {...register("date")}
                   />
@@ -440,11 +446,10 @@ const Slab = () => {
                     label="Vehicle No"
                     fullWidth
                     variant="standard"
-                    InputProps={{ inputProps: { max: "18-05-2023" } }}
                     {...register("vehicleNo")}
                   />
                 </Grid>
-                <Grid item xs={12} sm={5}>
+                <Grid item xs={12} sm={7}>
                   <FormLabel id="measurementUnitRadioLabel">
                     Measurement Unit
                   </FormLabel>
@@ -473,7 +478,7 @@ const Slab = () => {
                   ></Controller>
                 </Grid>
 
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={12} sm={5}>
                   <Controller
                     name="totalAreaUnit"
                     control={control}
@@ -505,6 +510,7 @@ const Slab = () => {
                     fullWidth
                     variant="standard"
                     type="number"
+                    {...register("maxSqFeet")}
                   />
                 </Grid>
                 <Grid item xs={12} sm={4}>
@@ -888,8 +894,8 @@ const Slab = () => {
                   sx={{
                     paddingLeft: 0,
                     paddingRight: 0,
-                    paddingTop: 10,
-                    paddingBottom: 12,
+                    paddingTop: 4,
+                    paddingBottom: 4,
                     borderRadius: 5,
                     height: "100%",
                     backgroundColor: "#ffffff",

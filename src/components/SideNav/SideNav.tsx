@@ -1,13 +1,13 @@
-import { useState } from "react";
+// import { useState } from "react";
 
 const SideNav = () => {
-  const dateItems = [
-    "7 May 2023",
-    "3 May 2023",
-    "29 April 2023",
-    "15 April 2023",
-  ];
-  const [selectedIndex, setSelectedIndex] = useState(-1);
+  // const dateItems = [
+  //   "7 May 2023",
+  //   "3 May 2023",
+  //   "29 April 2023",
+  //   "15 April 2023",
+  // ];
+  // const [selectedIndex, setSelectedIndex] = useState(-1);
 
   return (
     <></>
