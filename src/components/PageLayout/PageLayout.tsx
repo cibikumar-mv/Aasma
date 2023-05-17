@@ -59,7 +59,18 @@ const PageLayout = () => {
       </main>
 
       <footer>
-        <p>© Aasma Slab Measurements. All rights reserved.</p>
+        <p>
+          ©{" "}
+          <a
+            style={{ color: "white" }}
+            href="https://aasmatechin.netlify.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Aasma Technologies Solutions.
+          </a>{" "}
+          All rights reserved.
+        </p>
       </footer>
     </>
   );

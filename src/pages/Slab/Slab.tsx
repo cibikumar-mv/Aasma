@@ -24,6 +24,7 @@ import {
   IconButton,
   Divider,
 } from "@mui/material";
+import { DateField } from "@mui/x-date-pickers/DateField";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 import { Controller, useForm } from "react-hook-form";
 import useExitPrompt from "../../hooks/useExitPrompt";
@@ -419,6 +420,7 @@ const Slab = () => {
                     label="Date"
                     fullWidth
                     variant="standard"
+                    inputProps={{ max: "17-05-2023" }}
                     InputLabelProps={{ shrink: true }}
                     {...register("date")}
                   />
@@ -438,6 +440,7 @@ const Slab = () => {
                     label="Vehicle No"
                     fullWidth
                     variant="standard"
+                    InputProps={{ inputProps: { max: "18-05-2023" } }}
                     {...register("vehicleNo")}
                   />
                 </Grid>
@@ -509,6 +512,7 @@ const Slab = () => {
                     fullWidth
                     id="addRows"
                     label="Add Rows"
+                    helperText="Max 700 rows"
                     variant="standard"
                     type="number"
                     {...register("addRows")}
