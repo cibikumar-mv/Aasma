@@ -57,17 +57,7 @@ const PageLayout = () => {
       </main>
 
       <footer>
-        <p>
-          <a
-            style={{ color: "white" }}
-            href="https://aasmatechin.netlify.app/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Aasma Technologies Solutions
-          </a>{" "}
-          © 2023 - All rights reserved.
-        </p>
+        <p>Aasma Technology Solutions © 2023 - All rights reserved</p>
       </footer>
     </>
   );

@@ -6,10 +6,12 @@ import {
   View,
   Link,
   Font,
+  Image,
 } from "@react-pdf/renderer";
 import { tableData } from "../pages/Slab/Slab";
 import roboRegular from "/src/assets/fonts/Roboto-Regular.ttf";
 import roboBold from "/src/assets/fonts/Roboto-Bold.ttf";
+import copyright from "/src/assets/copyright.png";
 
 Font.register({
   family: "Roboto Regular",
@@ -83,7 +85,7 @@ const style = StyleSheet.create({
     marginTop: 55,
     fontSize: 10,
     textAlign: "justify",
-    fontFamily: "Roboto Bold",
+    fontFamily: "Roboto Regular",
   },
 });
 
@@ -91,7 +93,7 @@ const PdfFile = ({ rowData, invoiceData }: any) => {
   return (
     <Document>
       <Page size={"A4"} style={{}}>
-        <Link style={style.title} src="http://127.0.0.1:5173/">
+        <Link style={style.title} src="https://aasma-slab-measurements.netlify.app/">
           SLAB MEASUREMENT ESTIMATE
         </Link>
         <View
@@ -104,7 +106,7 @@ const PdfFile = ({ rowData, invoiceData }: any) => {
           }}
         >
           <Text style={style.textBold}>
-            Name of Party:{" "}
+            Name of Party:
             <Text style={style.text}>{invoiceData.partyName}</Text>
           </Text>
           <Text style={style.textBold}>
@@ -250,9 +252,9 @@ const PdfFile = ({ rowData, invoiceData }: any) => {
         >
           <Text style={style.footer}>
             <Link src="https://aasmatechin.netlify.app/">
-              Aasma Technologies solutions.
+              Aasma Technology Solutions
             </Link>
-            &nbsp; © 2023 - All rights reserved.
+            &nbsp; <Image src={copyright}/>2023 - All rights reserved
           </Text>
         </View>
       </Page>
@@ -383,9 +385,9 @@ const PdfFile = ({ rowData, invoiceData }: any) => {
             >
               <Text style={style.footer}>
                 <Link src="https://aasmatechin.netlify.app/">
-                  Aasma Technologies solutions
+                  Aasma Technology Solutions
                 </Link>
-                &nbsp; © 2023 - All rights reserved.
+                &nbsp; <Image src={copyright}/>2023 - All rights reserved
               </Text>
             </View>
           </Page>

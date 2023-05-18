@@ -17,7 +17,6 @@ import {
   DialogContent,
   FormControlLabel,
   Radio,
-  FormLabel,
   RadioGroup,
   OutlinedInput,
   InputAdornment,
@@ -63,8 +62,6 @@ export interface tableData {
   width: string;
   sqFeet: any;
   area: any;
-  lInput: boolean;
-  wInput: boolean;
 }
 
 const obj: tableData = {
@@ -74,8 +71,6 @@ const obj: tableData = {
   width: "0",
   sqFeet: 0,
   area: 0,
-  lInput: false,
-  wInput: false,
 };
 
 const Slab = () => {
@@ -89,7 +84,7 @@ const Slab = () => {
   const [showPDF, setShowPDF] = useState(false);
   const isInitialAdd = useRef(true);
   const [pdfRows, setPdfRows] = useState<any>([]);
-  const [setShowExitPrompt] = useExitPrompt(true);
+  const [showExitPrompt, setShowExitPrompt] = useExitPrompt(true);
   const [totalArea, settotalArea] = useState(0);
 
   const handleAddRow = (count: any | null) => {
@@ -106,7 +101,9 @@ const Slab = () => {
         setRows((prevRows) => [...prevRows, ...createRandomRow(count)]);
       }
     } else {
-      setShowExitPrompt(true);
+      if (!showExitPrompt) {
+        setShowExitPrompt(true);
+      }
       setRows(createRandomRow(-1));
       isInitialAdd.current = true;
       settotalArea(0);
@@ -116,7 +113,6 @@ const Slab = () => {
       showMaxAlert.current = true;
     }
   };
-  const activeInput = useRef(-1);
   const showMaxAlert = useRef(true);
   const { register, handleSubmit, reset, watch, getValues, setValue, control } =
     useForm({
@@ -141,28 +137,28 @@ const Slab = () => {
   const watchTotalAreaUnit = watch("totalAreaUnit");
   const watchMeasurementUnit = watch("measurementUnit");
 
-  useEffect(() => {
-    console.log("values:", getValues());
+  // useEffect(() => {
+  //   console.log("values:", getValues());
 
-    const handleClickOutside = (event: any) => {
-      if (ref.current && !ref.current.contains(event.target)) {
-        setRows((prev) => {
-          prev[activeInput.current].lInput = false;
-          return [...prev];
-        });
-      }
-      if (ref2.current && !ref2.current.contains(event.target)) {
-        setRows((prev) => {
-          prev[activeInput.current].wInput = false;
-          return [...prev];
-        });
-      }
-    };
-    document.addEventListener("click", handleClickOutside, true);
-    return () => {
-      document.removeEventListener("click", handleClickOutside, true);
-    };
-  }, []);
+  //   const handleClickOutside = (event: any) => {
+  //     if (ref.current && !ref.current.contains(event.target)) {
+  //       setRows((prev) => {
+  //         prev[activeInput.current].lInput = false;
+  //         return [...prev];
+  //       });
+  //     }
+  //     if (ref2.current && !ref2.current.contains(event.target)) {
+  //       setRows((prev) => {
+  //         prev[activeInput.current].wInput = false;
+  //         return [...prev];
+  //       });
+  //     }
+  //   };
+  //   document.addEventListener("click", handleClickOutside, true);
+  //   return () => {
+  //     document.removeEventListener("click", handleClickOutside, true);
+  //   };
+  // }, []);
 
   useEffect(() => {
     convertArea();
@@ -530,10 +526,14 @@ const Slab = () => {
                 <Grid item xs={12} sm={2}>
                   <ThemeProvider theme={theme}>
                     <Button
-                      variant="outlined"
+                      variant="contained"
                       color="primary"
                       onClick={() => handleAddRow(getValues("addRows"))}
-                      style={{ marginTop: "12px", borderRadius: 20 }}
+                      style={{
+                        marginTop: "12px",
+                        borderRadius: 10,
+                        color: "white",
+                      }}
                       fullWidth
                     >
                       Add
@@ -543,10 +543,14 @@ const Slab = () => {
                 <Grid item xs={12} sm={2}>
                   <ThemeProvider theme={theme}>
                     <Button
-                      variant="outlined"
+                      variant="contained"
                       color="secondary"
                       onClick={() => handleAddRow(null)}
-                      style={{ marginTop: "12px", borderRadius: 20 }}
+                      style={{
+                        marginTop: "12px",
+                        borderRadius: 10,
+                        color: "white",
+                      }}
                       fullWidth
                     >
                       Reset
@@ -577,133 +581,123 @@ const Slab = () => {
                               {row.srno}
                             </TableCell>
                             <TableCell
-                              onClick={() => {
-                                activeInput.current = i;
-                                setRows((prev) => {
-                                  prev[i].lInput = true;
-                                  return [...prev];
-                                });
-                              }}
+                              // onClick={() => {
+                              //   activeInput.current = i;
+                              //   setRows((prev) => {
+                              //     prev[i].lInput = true;
+                              //     return [...prev];
+                              //   });
+                              // }}
                             >
-                              {row.lInput ? (
-                                <input
-                                  autoFocus
-                                  style={{ width: "50px" }}
-                                  value={row.length === "0" ? "" : row.length}
-                                  ref={ref}
-                                  onChange={(e) => {
-                                    lastEditedIndex.current = i;
-                                    if (!/^\d*\.?\d*$/.test(e.target.value)) {
-                                      return;
+                              <input
+                                style={{ width: "50px", border: "none" }}
+                                value={row.length === "0" ? "" : row.length}
+                                placeholder={row.length}
+                                ref={ref}
+                                onChange={(e) => {
+                                  lastEditedIndex.current = i;
+                                  if (!/^\d*\.?\d*$/.test(e.target.value)) {
+                                    return;
+                                  }
+                                  const aUnit = getValues("totalAreaUnit");
+                                  const mUnit = getValues("measurementUnit");
+                                  setRows((prev) => {
+                                    prev[i].length = e.target.value;
+                                    prev[i].sqFeet =
+                                      parseFloat(prev[i].length) *
+                                      parseFloat(prev[i].width);
+                                    let area = 0;
+                                    switch (mUnit) {
+                                      case "centimeter":
+                                        area =
+                                          prev[i].sqFeet *
+                                          (aUnit === "Feet"
+                                            ? Convert.CmtoFeet
+                                            : Convert.CmtoMeter);
+                                        break;
+                                      case "feet":
+                                        area =
+                                          prev[i].sqFeet *
+                                          (aUnit === "Feet"
+                                            ? Convert.MeterToFeet
+                                            : Convert.FeetToMeter);
+                                        break;
+                                      case "inches":
+                                        area =
+                                          prev[i].sqFeet *
+                                          (aUnit === "Feet"
+                                            ? Convert.InchToFeet
+                                            : Convert.InchToMeter);
+                                        break;
+                                      default:
+                                        break;
                                     }
-                                    const aUnit = getValues("totalAreaUnit");
-                                    const mUnit = getValues("measurementUnit");
-                                    setRows((prev) => {
-                                      prev[i].length = e.target.value;
-                                      prev[i].sqFeet =
-                                        parseFloat(prev[i].length) *
-                                        parseFloat(prev[i].width);
-                                      let area = 0;
-                                      switch (mUnit) {
-                                        case "centimeter":
-                                          area =
-                                            prev[i].sqFeet *
-                                            (aUnit === "Feet"
-                                              ? Convert.CmtoFeet
-                                              : Convert.CmtoMeter);
-                                          break;
-                                        case "feet":
-                                          area =
-                                            prev[i].sqFeet *
-                                            (aUnit === "Feet"
-                                              ? Convert.MeterToFeet
-                                              : Convert.FeetToMeter);
-                                          break;
-                                        case "inches":
-                                          area =
-                                            prev[i].sqFeet *
-                                            (aUnit === "Feet"
-                                              ? Convert.InchToFeet
-                                              : Convert.InchToMeter);
-                                          break;
-                                        default:
-                                          break;
-                                      }
-                                      prev[i].area =
-                                        Math.round(area * 100) / 100;
-                                      calculateTotalArea();
-                                      return [...prev];
-                                    });
-                                  }}
-                                />
-                              ) : (
-                                row.length
-                              )}
+                                    prev[i].area = Math.round(area * 100) / 100;
+                                    calculateTotalArea();
+                                    return [...prev];
+                                  });
+                                }}
+                              />
                             </TableCell>
                             <TableCell
-                              onClick={() => {
-                                activeInput.current = i;
-                                setRows((prev) => {
-                                  prev[i].wInput = true;
-                                  return [...prev];
-                                });
-                              }}
+                              // onClick={() => {
+                              //   activeInput.current = i;
+                              //   setRows((prev) => {
+                              //     prev[i].wInput = true;
+                              //     return [...prev];
+                              //   });
+                              // }}
                             >
-                              {row.wInput ? (
-                                <input
-                                  autoFocus
-                                  style={{ width: "50px" }}
-                                  ref={ref2}
-                                  value={row.width === "0" ? "" : row.width}
-                                  onChange={(e) => {
-                                    lastEditedIndex.current = i;
-                                    if (!/^\d*\.?\d*$/.test(e.target.value)) {
-                                      return;
-                                    }
-                                    const aUnit = getValues("totalAreaUnit");
-                                    const mUnit = getValues("measurementUnit");
+                              <input
+                                style={{ width: "50px", border: "none" }}
+                                ref={ref2}
+                                value={row.width === "0" ? "" : row.width}
+                                placeholder={row.width}
+                                onChange={(e) => {
+                                  lastEditedIndex.current = i;
+                                  if (!/^\d*\.?\d*$/.test(e.target.value)) {
+                                    return;
+                                  }
+                                  const aUnit = getValues("totalAreaUnit");
+                                  const mUnit = getValues("measurementUnit");
 
-                                    setRows((prev) => {
-                                      prev[i].width = e.target.value;
-                                      prev[i].sqFeet =
-                                        parseFloat(prev[i].length) *
-                                        parseFloat(prev[i].width);
-                                      let area = 0;
-                                      switch (mUnit) {
-                                        case "centimeter":
-                                          area =
-                                            prev[i].sqFeet *
-                                            (aUnit === "Feet"
-                                              ? Convert.CmtoFeet
-                                              : Convert.CmtoMeter);
-                                          break;
-                                        case "feet":
-                                          area =
-                                            prev[i].sqFeet *
-                                            (aUnit === "Feet"
-                                              ? Convert.MeterToFeet
-                                              : Convert.FeetToMeter);
-                                          break;
-                                        case "inches":
-                                          area =
-                                            prev[i].sqFeet *
-                                            (aUnit === "Feet"
-                                              ? Convert.InchToFeet
-                                              : Convert.InchToMeter);
-                                          break;
-                                        default:
-                                          break;
-                                      }
-                                      prev[i].area =
-                                        Math.round(area * 100) / 100;
-                                      calculateTotalArea();
-                                      return [...prev];
-                                    });
-                                  }}
-                                />
-                              ) : (
-                                row.width
-                              )}
+                                  setRows((prev) => {
+                                    prev[i].width = e.target.value;
+                                    prev[i].sqFeet =
+                                      parseFloat(prev[i].length) *
+                                      parseFloat(prev[i].width);
+                                    let area = 0;
+                                    switch (mUnit) {
+                                      case "centimeter":
+                                        area =
+                                          prev[i].sqFeet *
+                                          (aUnit === "Feet"
+                                            ? Convert.CmtoFeet
+                                            : Convert.CmtoMeter);
+                                        break;
+                                      case "feet":
+                                        area =
+                                          prev[i].sqFeet *
+                                          (aUnit === "Feet"
+                                            ? Convert.MeterToFeet
+                                            : Convert.FeetToMeter);
+                                        break;
+                                      case "inches":
+                                        area =
+                                          prev[i].sqFeet *
+                                          (aUnit === "Feet"
+                                            ? Convert.InchToFeet
+                                            : Convert.InchToMeter);
+                                        break;
+                                      default:
+                                        break;
+                                    }
+                                    prev[i].area = Math.round(area * 100) / 100;
+                                    calculateTotalArea();
+                                    return [...prev];
+                                  });
+                                }}
+                              />
                             </TableCell>
                             <TableCell>{row.area}</TableCell>
                             <TableCell>
@@ -734,9 +728,10 @@ const Slab = () => {
                 <Grid item xs={12}>
                   <OutlinedInput
                     size="small"
-                    sx={{ width: 90, float: "right" }}
+                    sx={{ width: 90, float: "right", borderRadius: 4 }}
                     id="outlined-adornment-password"
                     {...register("repeatCount")}
+                    autoComplete="off"
                     endAdornment={
                       <InputAdornment position="end">
                         <IconButton
@@ -756,6 +751,7 @@ const Slab = () => {
                   <label>{"Total Sq. " + watchTotalAreaUnit}</label>
                   <TextField
                     fullWidth
+                    disabled
                     id="totalSqFeet"
                     variant="standard"
                     type="number"
@@ -794,11 +790,15 @@ const Slab = () => {
                       type="submit"
                       variant="contained"
                       color="primary"
+                      size="large"
                       fullWidth
                       onClick={() => {
                         handleDownloadPDF(rows.length);
                       }}
-                      style={{ borderRadius: 20 }}
+                      style={{
+                        borderRadius: "20px 0px 20px 20px",
+                        color: "white",
+                      }}
                     >
                       Save as PDF
                     </Button>
@@ -844,15 +844,16 @@ const Slab = () => {
                             rowData={pdfRows}
                           />
                         }
-                        fileName="slab"
+                        fileName="Slab _Measurement_Estimate"
                       >
                         {({ loading }) =>
                           loading ? (
                             <ThemeProvider theme={theme}>
                               <Button
+                                autoFocus
                                 variant="contained"
                                 color="primary"
-                                style={{ borderRadius: 20 }}
+                                style={{ borderRadius: 10, color: "white" }}
                               >
                                 Preparing...
                               </Button>
@@ -861,8 +862,10 @@ const Slab = () => {
                             <ThemeProvider theme={theme}>
                               <Button
                                 variant="contained"
+                                autoFocus
+                                fullWidth
                                 color="primary"
-                                style={{ borderRadius: 20 }}
+                                style={{ borderRadius: 10, color: "white" }}
                               >
                                 Download PDF
                               </Button>
@@ -880,11 +883,15 @@ const Slab = () => {
                       variant="contained"
                       color="secondary"
                       fullWidth
+                      size="large"
                       onClick={() => {
                         reset();
                         handleAddRow(null);
                       }}
-                      style={{ borderRadius: 20 }}
+                      style={{
+                        borderRadius: "20px 0px 20px 20px",
+                        color: "white",
+                      }}
                     >
                       Reset Form
                     </Button>
