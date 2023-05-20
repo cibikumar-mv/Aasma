@@ -728,7 +728,16 @@ const Slab = () => {
                 <Grid item xs={12}>
                   <OutlinedInput
                     size="small"
-                    sx={{ width: 90, float: "right", borderRadius: 4 }}
+                    sx={{
+                      width: 90,
+                      float: "right",
+                      borderRadius: 4,
+                    }}
+                    inputProps={{
+                      "&:hover $textFieldNotchedOutline": {
+                        borderColor: "blue",
+                      },
+                    }}
                     id="outlined-adornment-password"
                     {...register("repeatCount")}
                     autoComplete="off"
