@@ -9,20 +9,25 @@ footer {
   
   z-index: 2;
 
-  /* p {
-    padding: 10px;
-    padding-right: 200px;
-    margin: 0;
-  } */
+  p {
+    
+    margin-left: 10rem;
+  }
+}
+
+main{
+  margin-left: 10rem;
 }
 
 :root {
   background-color: #ffffff;
 }
 
+
+
 nav {
   z-index: 2;
-  width: 15rem;
+  width: 10rem;
   position: fixed;
   height: 100vh;
   background-color: rgb(25, 23, 23);

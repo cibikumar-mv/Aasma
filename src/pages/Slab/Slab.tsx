@@ -30,7 +30,7 @@ import PdfFile from "../../components/PdfFile";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import logo from "/src/assets/logo.png";
-import invoicePic from "/src/assets/invoicevector.png";
+import invoicePic from "/src/assets/aasmabg1.png";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import MediaQuery from "react-responsive";
 import CloseIcon from "@mui/icons-material/Close";
@@ -350,7 +350,7 @@ const Slab = () => {
   return (
     <Box
       sx={{
-        width: "80%",
+        width: "90%",
         margin: "auto",
         paddingBottom: 10,
         paddingTop: 1,
@@ -358,7 +358,7 @@ const Slab = () => {
     >
       <Paper elevation={0} sx={{ padding: 1, borderRadius: 5 }}>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <Grid container spacing={3} alignItems={"center"}>
+          <Grid container spacing={3}>
             <Grid item xs={12} lg={6}>
               <Grid container spacing={2}>
                 <Grid item xs={12} pb={5}>
@@ -581,13 +581,13 @@ const Slab = () => {
                               {row.srno}
                             </TableCell>
                             <TableCell
-                              // onClick={() => {
-                              //   activeInput.current = i;
-                              //   setRows((prev) => {
-                              //     prev[i].lInput = true;
-                              //     return [...prev];
-                              //   });
-                              // }}
+                            // onClick={() => {
+                            //   activeInput.current = i;
+                            //   setRows((prev) => {
+                            //     prev[i].lInput = true;
+                            //     return [...prev];
+                            //   });
+                            // }}
                             >
                               <input
                                 style={{ width: "50px", border: "none" }}
@@ -640,13 +640,13 @@ const Slab = () => {
                               />
                             </TableCell>
                             <TableCell
-                              // onClick={() => {
-                              //   activeInput.current = i;
-                              //   setRows((prev) => {
-                              //     prev[i].wInput = true;
-                              //     return [...prev];
-                              //   });
-                              // }}
+                            // onClick={() => {
+                            //   activeInput.current = i;
+                            //   setRows((prev) => {
+                            //     prev[i].wInput = true;
+                            //     return [...prev];
+                            //   });
+                            // }}
                             >
                               <input
                                 style={{ width: "50px", border: "none" }}
@@ -755,6 +755,11 @@ const Slab = () => {
                     id="totalSqFeet"
                     variant="standard"
                     type="number"
+                    sx={{
+                      "& .MuiInputBase-input.Mui-disabled": {
+                        WebkitTextFillColor: "#000000",
+                      },
+                    }}
                     value={totalArea}
                     {...register("totalSqFeet")}
                   />
@@ -773,9 +778,15 @@ const Slab = () => {
                   <label>Total Cost</label>
                   <TextField
                     fullWidth
+                    disabled
                     id="totalCost"
                     variant="standard"
                     type="number"
+                    sx={{
+                      "& .MuiInputBase-input.Mui-disabled": {
+                        WebkitTextFillColor: "#000000",
+                      },
+                    }}
                     value={
                       watchPrice
                         ? Math.round(watchPrice * totalArea * 100) / 100
@@ -906,9 +917,10 @@ const Slab = () => {
                   sx={{
                     paddingLeft: 0,
                     paddingRight: 0,
-                    paddingTop: 4,
+                    marginTop: 13,
                     paddingBottom: 4,
                     borderRadius: 5,
+
                     height: "100%",
                     backgroundColor: "#ffffff",
                   }}
