@@ -4,6 +4,7 @@ import {
   Button,
   Divider,
   Fab,
+  IconButton,
   List,
   ListItem,
   ListItemButton,
@@ -11,6 +12,7 @@ import {
   ListItemText,
   Menu,
   MenuItem,
+  TextField,
   ThemeProvider,
   Toolbar,
   createTheme,
@@ -23,9 +25,13 @@ import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import LogoutIcon from "@mui/icons-material/Logout";
+import CreateIcon from "@mui/icons-material/Create";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import DoneIcon from "@mui/icons-material/Done";
+import CloseIcon from "@mui/icons-material/Close";
 import InboxIcon from "@mui/icons-material/MoveToInbox";
 import MailIcon from "@mui/icons-material/Mail";
-import React from "react";
+import React, { useState } from "react";
 
 const darkTheme = createTheme({
   palette: {
@@ -34,6 +40,21 @@ const darkTheme = createTheme({
 });
 
 const PageLayout = () => {
+  const [isHovering, setIsHovering] = useState(false);
+  const [maxch, setmaxch] = useState("20ch");
+  const [action, setaction] = useState("false");
+  const [enableText, setenableText] = useState("false");
+
+  const handleMouseOver = () => {
+    setmaxch("10ch");
+    setIsHovering(true);
+  };
+
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const handleMouseOut = () => {
+    setmaxch("20ch");
+    setIsHovering(false);
+  };
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -81,15 +102,134 @@ const PageLayout = () => {
           <Divider />
           <List>
             {[
-              "Cibi_19-05-2023",
+              "Cibi_19-05-2023 jyzejfzbdkjgbxj",
               "Cibi_18-05-2023",
               "Cibi_09-05-2023",
               "Cibi_21-04-2023",
             ].map((text, index) => (
-              <ListItem key={text} disablePadding>
-                <ListItemButton>
-                  <ListItemText primary={text} />
-                </ListItemButton>
+              <ListItem
+                key={text}
+                disablePadding
+                onClick={() => {
+                  setSelectedIndex(index);
+                }}
+              >
+                <div>
+                  <ListItemButton
+                    style={{
+                      padding: 5,
+                      alignItems: "center",
+                      height: 50,
+                      width: 170,
+                    }}
+                  >
+                    {selectedIndex === index && enableText === "true" ? (
+                      <TextField
+                        margin="dense"
+                        defaultValue={text}
+                        sx={{
+                          "& .MuiInputBase-root": {
+                            height: 30,
+                          },
+                        }}
+                      />
+                    ) : (
+                      <ListItemText
+                        primary={text}
+                        primaryTypographyProps={{
+                          fontSize: "14px",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          maxWidth: maxch,
+                        }}
+                      />
+                    )}
+
+                    {selectedIndex === index ? (
+                      <div
+                        style={{
+                          display: "flex",
+                          flexWrap: "nowrap",
+                          padding: 0,
+                          margin: 0,
+                        }}
+                      >
+                        {action === "false" ? (
+                          <div
+                            style={{
+                              display: "flex",
+                              flexWrap: "nowrap",
+                              padding: 0,
+                              margin: 0,
+                            }}
+                          >
+                            <IconButton
+                              onClick={() => {
+                                setaction("edit");
+                                setenableText("true");
+                              }}
+                            >
+                              <CreateIcon fontSize="small" />
+                            </IconButton>
+                            <IconButton
+                              onClick={() => {
+                                setaction("delete");
+                              }}
+                            >
+                              <DeleteForeverIcon fontSize="small" />
+                            </IconButton>
+                          </div>
+                        ) : null}
+
+                        {action === "edit" ? (
+                          <div
+                            style={{
+                              display: "flex",
+                              flexWrap: "nowrap",
+                              padding: 0,
+                              margin: 0,
+                            }}
+                          >
+                            <IconButton onClick={() => {}}>
+                              <DoneIcon fontSize="small" />
+                            </IconButton>
+                            <IconButton
+                              onClick={() => {
+                                setaction("false");
+                                setenableText("false");
+                              }}
+                            >
+                              <CloseIcon fontSize="small" />
+                            </IconButton>
+                          </div>
+                        ) : null}
+
+                        {action === "delete" ? (
+                          <div
+                            style={{
+                              display: "flex",
+                              flexWrap: "nowrap",
+                              padding: 0,
+                              margin: 0,
+                            }}
+                          >
+                            <IconButton onClick={() => {}}>
+                              <DoneIcon fontSize="small" />
+                            </IconButton>
+                            <IconButton
+                              onClick={() => {
+                                setaction("false");
+                              }}
+                            >
+                              <CloseIcon fontSize="small" />
+                            </IconButton>
+                          </div>
+                        ) : null}
+                      </div>
+                    ) : null}
+                  </ListItemButton>
+                </div>
               </ListItem>
             ))}
           </List>
