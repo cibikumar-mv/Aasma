@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
 import "./Slab.scss";
 import {
   Grid,
@@ -30,10 +30,13 @@ import PdfFile from "../../components/PdfFile";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import logo from "/src/assets/logo.png";
-import invoicePic from "/src/assets/aasmabg1.png";
+import invoicePic from "/src/assets/aasmabg2.jpg";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import MediaQuery from "react-responsive";
 import CloseIcon from "@mui/icons-material/Close";
+import { db } from "../../firebase-config";
+import { addDoc, collection, doc, updateDoc } from "firebase/firestore";
+import { FormContext } from "../../contexts/FormContext";
 
 const theme = createTheme({
   palette: {
@@ -74,95 +77,45 @@ const obj: tableData = {
 };
 
 const Slab = () => {
-  const curr = new Date();
-  curr.setDate(curr.getDate() + 0);
-  const curDate = curr.toISOString().substring(0, 10);
-  const ref = useRef<any>(null);
-  const ref2 = useRef<any>(null);
+  const { formData, user, fetchData, formList } = useContext(FormContext);
+
   const lastEditedIndex = useRef(-1);
   const idCounter = useRef(1);
-  const [showPDF, setShowPDF] = useState(false);
   const isInitialAdd = useRef(true);
-  const [pdfRows, setPdfRows] = useState<any>([]);
-  const [showExitPrompt, setShowExitPrompt] = useExitPrompt(true);
-  const [totalArea, settotalArea] = useState(0);
-
-  const handleAddRow = (count: any | null) => {
-    if (count) {
-      console.log(rows.length + count, rows.length, count);
-
-      if (rows.length + parseInt(count) > 701) {
-        alert("Maximum limit of 700 reached");
-        return;
-      }
-      if (isInitialAdd.current) {
-        setRows(createRandomRow(count));
-      } else {
-        setRows((prevRows) => [...prevRows, ...createRandomRow(count)]);
-      }
-    } else {
-      if (!showExitPrompt) {
-        setShowExitPrompt(true);
-      }
-      setRows(createRandomRow(-1));
-      isInitialAdd.current = true;
-      settotalArea(0);
-      setValue("pricePerSqFeet", 0);
-      setValue("startingRow", "");
-      setValue("addRows", null);
-      showMaxAlert.current = true;
-    }
-  };
   const showMaxAlert = useRef(true);
-  const { register, handleSubmit, reset, watch, getValues, setValue, control } =
-    useForm({
-      defaultValues: {
-        partyName: "",
-        date: curDate,
-        quality: "",
-        vehicleNo: "",
-        addRows: null,
-        startingRow: "",
-        repeatCount: "",
-        totalSqFeet: 0,
-        pricePerSqFeet: 0,
-        totalCost: 0,
-        totalAreaUnit: "Feet",
-        measurementUnit: "feet",
-        maxSqFeet: "",
-      },
-    });
+  const finalRow = useRef(-1);
 
+  const [showPDF, setShowPDF] = useState(false);
+  const [pdfRows, setPdfRows] = useState<any>([]);
+  const [rows, setRows] = useState<tableData[]>(formData.rows);
+
+  const [showExitPrompt, setShowExitPrompt] = useExitPrompt(true);
+
+  const { register, reset, watch, getValues, setValue, control } = useForm({
+    defaultValues: formData.data,
+  });
   const watchPrice = watch("pricePerSqFeet");
+  const watchtTotalArea = watch("totalSqFeet");
   const watchTotalAreaUnit = watch("totalAreaUnit");
   const watchMeasurementUnit = watch("measurementUnit");
-
-  // useEffect(() => {
-  //   console.log("values:", getValues());
-
-  //   const handleClickOutside = (event: any) => {
-  //     if (ref.current && !ref.current.contains(event.target)) {
-  //       setRows((prev) => {
-  //         prev[activeInput.current].lInput = false;
-  //         return [...prev];
-  //       });
-  //     }
-  //     if (ref2.current && !ref2.current.contains(event.target)) {
-  //       setRows((prev) => {
-  //         prev[activeInput.current].wInput = false;
-  //         return [...prev];
-  //       });
-  //     }
-  //   };
-  //   document.addEventListener("click", handleClickOutside, true);
-  //   return () => {
-  //     document.removeEventListener("click", handleClickOutside, true);
-  //   };
-  // }, []);
 
   useEffect(() => {
     convertArea();
   }, [watchTotalAreaUnit, watchMeasurementUnit]);
+
+  useEffect(() => {
+    setValue(
+      "totalCost",
+      Math.round(getValues("pricePerSqFeet") * getValues("totalSqFeet") * 100) /
+        100
+    );
+  }, [watchPrice, watchtTotalArea]);
+
+  useEffect(() => {
+    console.log("data:", formData);
+    reset(formData.data);
+    setRows(formData.rows);
+  }, [formData]);
 
   const convertArea = () => {
     const aUnit = getValues("totalAreaUnit");
@@ -203,7 +156,7 @@ const Slab = () => {
         default:
           break;
       }
-      calculateTotalArea();
+      calculateTotalArea(4);
       return [...prev];
     });
   };
@@ -257,26 +210,40 @@ const Slab = () => {
       }
       return [...prev];
     });
-    calculateTotalArea();
+    calculateTotalArea(5);
   };
 
-  const [rows, setRows] = useState([{ ...obj }]);
+  const handleAddRow = (count: any | null) => {
+    if (count) {
+      if (rows.length + parseInt(count) > 701) {
+        alert("Maximum limit of 700 reached");
+        return;
+      }
+      if (isInitialAdd.current) {
+        setRows(createRandomRow(count));
+      } else {
+        setRows((prevRows) => [...prevRows, ...createRandomRow(count)]);
+      }
+    } else {
+      if (!showExitPrompt) {
+        setShowExitPrompt(true);
+      }
+      setRows(createRandomRow(-1));
+      isInitialAdd.current = true;
+      setValue("pricePerSqFeet", 0);
+      setValue("startingRow", "");
+      setValue("addRows", null);
+      showMaxAlert.current = true;
+    }
+  };
 
-  const onSubmit = (data: any) => console.log(data);
-
-  const calculateTotalArea = () => {
+  const calculateTotalArea = (count: any) => {
     let total = 0;
     rows.forEach((row) => {
       if (!isNaN(row.area)) {
         total += row.area;
       }
     });
-    console.log("test:", parseFloat(getValues("maxSqFeet")) * 0.9, total);
-    console.log(
-      "test:",
-      showMaxAlert.current,
-      total >= parseFloat(getValues("maxSqFeet")) * 0.9
-    );
 
     if (
       showMaxAlert.current &&
@@ -286,18 +253,19 @@ const Slab = () => {
       alert("Total sq feet reaches near to your limit!");
       showMaxAlert.current = false;
     }
-    settotalArea(Math.round(total * 100) / 100);
+    setValue("totalSqFeet", Math.round(total * 100) / 100);
   };
 
-  const handleDownloadPDF = (count: number) => {
+  const handleDownloadPDF = async (count: number) => {
     if (rows.length === 1 && rows[0].length === "0" && rows[0].width === "0") {
       alert("Please fill atleast 1 record");
       return;
     }
+    // await handleSave();
     let netTotal = 0;
     let dataLen = rows.length;
     const pageRows = [];
-    const pages = Math.ceil(count / 70);
+    const pages = Math.ceil(finalRow.current / 70);
     for (let i = 0; i < pages; i++) {
       let pageTotal = 0;
       if (dataLen >= 70) {
@@ -343,6 +311,36 @@ const Slab = () => {
     setShowPDF(true);
   };
 
+  const handleSave = async () => {
+    if (rows.length === 1 && rows[0].length === "0" && rows[0].width === "0") {
+      alert("Please fill atleast 1 record");
+      return;
+    }
+    console.log("title:", formData.title, formData);
+
+    const postObj = {
+      ...getValues(),
+      rows,
+      title: formData.title
+        ? formData.title
+        : getValues("partyName") + "_" + getValues("date"),
+    };
+    console.log("id:", formData.id);
+
+    if (formData.id) {
+      const ref = doc(db, `users/${user?.uid}/forms`, formData.id);
+      await updateDoc(ref, postObj);
+    } else {
+      if (formList.length === 30) {
+        alert("Reached Maximum record length 30");
+        return;
+      }
+      const ref = collection(db, `users/${user?.uid}/forms`);
+      await addDoc(ref, postObj);
+    }
+    await fetchData();
+  };
+
   const handleDialogClose = () => {
     setShowPDF(false);
   };
@@ -357,7 +355,7 @@ const Slab = () => {
       }}
     >
       <Paper elevation={0} sx={{ padding: 1, borderRadius: 5 }}>
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form>
           <Grid container spacing={3}>
             <Grid item xs={12} lg={6}>
               <Grid container spacing={2}>
@@ -580,22 +578,15 @@ const Slab = () => {
                             <TableCell component="th" scope="row">
                               {row.srno}
                             </TableCell>
-                            <TableCell
-                            // onClick={() => {
-                            //   activeInput.current = i;
-                            //   setRows((prev) => {
-                            //     prev[i].lInput = true;
-                            //     return [...prev];
-                            //   });
-                            // }}
-                            >
+                            <TableCell>
                               <input
                                 style={{ width: "50px", border: "none" }}
                                 value={row.length === "0" ? "" : row.length}
                                 placeholder={row.length}
-                                ref={ref}
                                 onChange={(e) => {
                                   lastEditedIndex.current = i;
+                                  finalRow.current =
+                                    finalRow.current > i ? finalRow.current : i;
                                   if (!/^\d*\.?\d*$/.test(e.target.value)) {
                                     return;
                                   }
@@ -633,28 +624,21 @@ const Slab = () => {
                                         break;
                                     }
                                     prev[i].area = Math.round(area * 100) / 100;
-                                    calculateTotalArea();
+                                    calculateTotalArea(1);
                                     return [...prev];
                                   });
                                 }}
                               />
                             </TableCell>
-                            <TableCell
-                            // onClick={() => {
-                            //   activeInput.current = i;
-                            //   setRows((prev) => {
-                            //     prev[i].wInput = true;
-                            //     return [...prev];
-                            //   });
-                            // }}
-                            >
+                            <TableCell>
                               <input
                                 style={{ width: "50px", border: "none" }}
-                                ref={ref2}
                                 value={row.width === "0" ? "" : row.width}
                                 placeholder={row.width}
                                 onChange={(e) => {
                                   lastEditedIndex.current = i;
+                                  finalRow.current =
+                                    finalRow.current > i ? finalRow.current : i;
                                   if (!/^\d*\.?\d*$/.test(e.target.value)) {
                                     return;
                                   }
@@ -693,7 +677,7 @@ const Slab = () => {
                                         break;
                                     }
                                     prev[i].area = Math.round(area * 100) / 100;
-                                    calculateTotalArea();
+                                    calculateTotalArea(2);
                                     return [...prev];
                                   });
                                 }}
@@ -710,7 +694,7 @@ const Slab = () => {
                                       prev[i].length = "---- || ----";
                                       prev[i].area = "---- || ----";
                                       prev[i].sqFeet = "---- || ----";
-                                      calculateTotalArea();
+                                      calculateTotalArea(3);
                                       return [...prev];
                                     });
                                   }}
@@ -732,11 +716,6 @@ const Slab = () => {
                       width: 90,
                       float: "right",
                       borderRadius: 4,
-                    }}
-                    inputProps={{
-                      "&:hover $textFieldNotchedOutline": {
-                        borderColor: "blue",
-                      },
                     }}
                     id="outlined-adornment-password"
                     {...register("repeatCount")}
@@ -769,7 +748,6 @@ const Slab = () => {
                         WebkitTextFillColor: "#000000",
                       },
                     }}
-                    value={totalArea}
                     {...register("totalSqFeet")}
                   />
                 </Grid>
@@ -796,18 +774,29 @@ const Slab = () => {
                         WebkitTextFillColor: "#000000",
                       },
                     }}
-                    value={
-                      watchPrice
-                        ? Math.round(watchPrice * totalArea * 100) / 100
-                        : 0
-                    }
                     {...register("totalCost")}
                   />
                 </Grid>
-                <Grid item xs={12} md={8}>
+                <Grid item xs={12} md={4}>
                   <ThemeProvider theme={theme}>
                     <Button
-                      type="submit"
+                      variant="contained"
+                      color="primary"
+                      size="large"
+                      fullWidth
+                      onClick={handleSave}
+                      style={{
+                        borderRadius: "20px 0px 20px 20px",
+                        color: "white",
+                      }}
+                    >
+                      Save
+                    </Button>
+                  </ThemeProvider>
+                </Grid>
+                <Grid item xs={12} md={4}>
+                  <ThemeProvider theme={theme}>
+                    <Button
                       variant="contained"
                       color="primary"
                       size="large"
@@ -820,7 +809,7 @@ const Slab = () => {
                         color: "white",
                       }}
                     >
-                      Save as PDF
+                      Generate PDF
                     </Button>
                   </ThemeProvider>
                 </Grid>
@@ -926,7 +915,7 @@ const Slab = () => {
                   sx={{
                     paddingLeft: 0,
                     paddingRight: 0,
-                    marginTop: 13,
+                    marginTop: 20,
                     paddingBottom: 4,
                     borderRadius: 5,
 
