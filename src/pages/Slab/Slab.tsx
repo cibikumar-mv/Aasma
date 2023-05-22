@@ -359,7 +359,7 @@ const Slab = () => {
           <Grid container spacing={3}>
             <Grid item xs={12} lg={6}>
               <Grid container spacing={2}>
-                <Grid item xs={12} pb={5}>
+                <Grid item xs={12} pb={5} sx={{ paddingBottom: 0 }}>
                   <div style={{ display: "flex" }}>
                     <img
                       src={logo}

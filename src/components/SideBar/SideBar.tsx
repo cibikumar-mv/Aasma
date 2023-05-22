@@ -116,7 +116,7 @@ const SideBar = () => {
     <ThemeProvider theme={darkTheme}>
       <div>
         <AppBar position="fixed" sx={{}}>
-          <Toolbar>
+          <Toolbar variant="dense">
             <IconButton
               color="inherit"
               aria-label="open drawer"
