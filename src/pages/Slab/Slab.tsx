@@ -29,7 +29,7 @@ import useExitPrompt from "../../hooks/useExitPrompt";
 import PdfFile from "../../components/PdfFile";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
-import logo from "/src/assets/logo.png";
+import logo from "/src/assets/aasmalogonew.png";
 import invoicePic from "/src/assets/aasmabg2.jpg";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import MediaQuery from "react-responsive";
@@ -363,19 +363,8 @@ const Slab = () => {
                   <div style={{ display: "flex" }}>
                     <img
                       src={logo}
-                      style={{ width: 60, height: 60, margin: 0 }}
+                      style={{ width: 202, height: 60, margin: 0 }}
                     />
-                    <h2
-                      style={{
-                        marginLeft: 20,
-                        marginTop: 3,
-                        marginBottom: 5,
-                        fontFamily: "Helvetica",
-                        textAlign: "left",
-                      }}
-                    >
-                      Aasma Technology <br /> Solutions
-                    </h2>
                   </div>
                 </Grid>
                 <Grid item xs={12}>
@@ -524,6 +513,7 @@ const Slab = () => {
                 <Grid item xs={12} sm={2}>
                   <ThemeProvider theme={theme}>
                     <Button
+                      disableElevation
                       variant="contained"
                       color="primary"
                       onClick={() => handleAddRow(getValues("addRows"))}
@@ -541,6 +531,7 @@ const Slab = () => {
                 <Grid item xs={12} sm={2}>
                   <ThemeProvider theme={theme}>
                     <Button
+                      disableElevation
                       variant="contained"
                       color="secondary"
                       onClick={() => handleAddRow(null)}
@@ -780,6 +771,7 @@ const Slab = () => {
                 <Grid item xs={12} md={4}>
                   <ThemeProvider theme={theme}>
                     <Button
+                      disableElevation
                       variant="contained"
                       color="primary"
                       size="large"
@@ -797,6 +789,7 @@ const Slab = () => {
                 <Grid item xs={12} md={4}>
                   <ThemeProvider theme={theme}>
                     <Button
+                      disableElevation
                       variant="contained"
                       color="primary"
                       size="large"
