@@ -189,6 +189,7 @@ const SideBar = () => {
                     height: 50,
                     width: 170,
                   }}
+                  selected={selectedIndex === index}
                 >
                   {selectedIndex === index && enableText === "true" ? (
                     <TextField

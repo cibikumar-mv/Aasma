@@ -57,6 +57,7 @@ const SideNav = () => {
   });
 
   const [maxch, setmaxch] = useState("20ch");
+
   const [action, setaction] = useState("false");
   const [enableText, setenableText] = useState("false");
   const [selectedIndex, setSelectedIndex] = useState(-1);
@@ -158,6 +159,7 @@ const SideNav = () => {
                   height: 50,
                   width: 170,
                 }}
+                selected={selectedIndex === index}
               >
                 {selectedIndex === index && enableText === "true" ? (
                   <TextField
