@@ -18,7 +18,9 @@ import {
   MenuItem,
   ThemeProvider,
   createTheme,
+  Snackbar,
 } from "@mui/material";
+import Tooltip from "@mui/material/Tooltip";
 import { useContext, useEffect, useState } from "react";
 import { auth, googleProvider } from "../../firebase-config";
 import { signInWithPopup, signOut } from "firebase/auth";
@@ -58,12 +60,46 @@ const SideNav = () => {
   const [action, setaction] = useState("false");
   const [enableText, setenableText] = useState("false");
   const [selectedIndex, setSelectedIndex] = useState(-1);
+
+  const [delToastOpen, setdelToastOpen] = useState(false);
+  const [editToastOpen, seteditToastOpen] = useState(false);
+
+  const delActionToast = (
+    <>
+      <IconButton
+        size="small"
+        aria-label="close"
+        color="inherit"
+        onClick={() => {
+          setdelToastOpen(false);
+        }}
+      >
+        <CloseIcon fontSize="small" />
+      </IconButton>
+    </>
+  );
+
+  const editActionToast = (
+    <>
+      <IconButton
+        size="small"
+        aria-label="close"
+        color="inherit"
+        onClick={() => {
+          seteditToastOpen(false);
+        }}
+      >
+        <CloseIcon fontSize="small" />
+      </IconButton>
+    </>
+  );
+
   useEffect(() => {
     fetchData();
   }, [user]);
 
   const handleSetForm = (form: any, i: number) => {
-    setSelectedIndex(i)
+    setSelectedIndex(i);
     const { rows, id, title, ...data } = form;
     setFormData({ rows, data, id, title });
   };
@@ -92,7 +128,10 @@ const SideNav = () => {
               borderColor: "grey",
               borderRadius: "8px",
             }}
-            onClick={() => newForm()}
+            onClick={() => {
+              setSelectedIndex(-1);
+              newForm();
+            }}
           >
             <ListItemIcon
               style={{ padding: 5, minWidth: 0, width: 18, height: 18 }}
@@ -131,16 +170,18 @@ const SideNav = () => {
                     }}
                   />
                 ) : (
-                  <ListItemText
-                    primary={form.title}
-                    primaryTypographyProps={{
-                      fontSize: "14px",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      maxWidth: maxch,
-                    }}
-                  />
+                  <Tooltip title={form.title}>
+                    <ListItemText
+                      primary={form.title}
+                      primaryTypographyProps={{
+                        fontSize: "14px",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        maxWidth: maxch,
+                      }}
+                    />
+                  </Tooltip>
                 )}
 
                 {selectedIndex === index ? (
@@ -190,11 +231,25 @@ const SideNav = () => {
                       >
                         <IconButton
                           onClick={() => {
+                            seteditToastOpen(true);
                             console.log("Done edit");
                           }}
                         >
                           <DoneIcon fontSize="small" />
                         </IconButton>
+                        <Snackbar
+                          open={editToastOpen}
+                          autoHideDuration={3000}
+                          onClose={() => {
+                            seteditToastOpen(false);
+                          }}
+                          message="Form name changed"
+                          anchorOrigin={{
+                            vertical: "bottom",
+                            horizontal: "center",
+                          }}
+                          action={editActionToast}
+                        />
                         <IconButton
                           onClick={() => {
                             setaction("false");
@@ -217,11 +272,25 @@ const SideNav = () => {
                       >
                         <IconButton
                           onClick={() => {
+                            setdelToastOpen(true);
                             console.log("Done delete");
                           }}
                         >
                           <DoneIcon fontSize="small" />
                         </IconButton>
+                        <Snackbar
+                          open={delToastOpen}
+                          autoHideDuration={3000}
+                          onClose={() => {
+                            setdelToastOpen(false);
+                          }}
+                          message="Form Deleted"
+                          anchorOrigin={{
+                            vertical: "bottom",
+                            horizontal: "center",
+                          }}
+                          action={delActionToast}
+                        />
                         <IconButton
                           onClick={() => {
                             setaction("false");

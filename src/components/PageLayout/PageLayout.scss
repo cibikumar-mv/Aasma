@@ -15,9 +15,7 @@ footer {
   }
 }
 
-main{
-  margin-left: 10rem;
-}
+
 
 :root {
   background-color: #ffffff;
@@ -31,4 +29,31 @@ nav {
   position: fixed;
   height: 100vh;
   background-color: rgb(25, 23, 23);
+}
+
+main{
+  margin-left: 10rem;
+}
+
+@media screen and (max-width: 1223px) {
+  main{
+    margin-left: 0;
+    margin-top: 50px;
+  }
+  footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    
+    z-index: 2;
+  
+    p {
+      
+      margin-left: 0;
+    }
+  }
 }

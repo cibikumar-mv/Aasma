@@ -4,12 +4,18 @@ import { Fab } from "@mui/material";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import MediaQuery from "react-responsive";
 import SideNav from "../SideNav/SideNav";
+import SideBar from "../SideBar/SideBar";
 import { FormContextProvider } from "../../contexts/FormContext";
 
 const PageLayout = () => {
   return (
     <FormContextProvider>
-      <SideNav />
+      <MediaQuery minWidth={1224}>
+        <SideNav />
+      </MediaQuery>
+      <MediaQuery maxWidth={1223}>
+        <SideBar />
+      </MediaQuery>
       <main>
         <Outlet />
 
