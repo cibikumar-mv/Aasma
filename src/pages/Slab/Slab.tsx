@@ -271,7 +271,7 @@ const Slab = () => {
       alert("Please fill atleast 1 record");
       return;
     }
-    if(user) {
+    if (user) {
       await handleSave();
     }
     let netTotal = 0;
@@ -391,14 +391,16 @@ const Slab = () => {
           <Grid container spacing={3}>
             <Grid item xs={12} lg={6}>
               <Grid container spacing={2}>
-                <Grid item xs={12} pb={5} sx={{ paddingBottom: 0 }}>
-                  <div style={{ display: "flex" }}>
-                    <img
-                      src={logo}
-                      style={{ width: 202, height: 60, margin: 0 }}
-                    />
-                  </div>
-                </Grid>
+                <MediaQuery maxWidth={1223}>
+                  <Grid item xs={12} pb={5} sx={{ paddingBottom: 0 }}>
+                    <div style={{ display: "flex" }}>
+                      <img
+                        src={logo}
+                        style={{ width: 202, height: 60, margin: 0 }}
+                      />
+                    </div>
+                  </Grid>
+                </MediaQuery>
                 <Grid item xs={12}>
                   <h1
                     style={{
@@ -418,7 +420,13 @@ const Slab = () => {
                     id="partyName"
                     placeholder="Enter Party Name"
                     fullWidth
-                    variant="standard"
+                    variant="outlined"
+                    sx={{ maxHeight: 40, marginTop: "2px" }}
+                    inputProps={{
+                      style: {
+                        padding: 5,
+                      },
+                    }}
                     {...register("partyName")}
                   />
                 </Grid>
@@ -428,10 +436,14 @@ const Slab = () => {
                     id="date"
                     type="date"
                     fullWidth
-                    variant="standard"
+                    variant="outlined"
+                    sx={{ maxHeight: 40, marginTop: "2px" }}
                     InputProps={{
                       inputProps: {
                         max: new Date().toISOString().slice(0, 10),
+                        style: {
+                          padding: 5,
+                        },
                       },
                     }}
                     InputLabelProps={{ shrink: true }}
@@ -444,7 +456,13 @@ const Slab = () => {
                     id="quality"
                     placeholder="Enter quality"
                     fullWidth
-                    variant="standard"
+                    variant="outlined"
+                    sx={{ maxHeight: 40, marginTop: "2px" }}
+                    inputProps={{
+                      style: {
+                        padding: 5,
+                      },
+                    }}
                     {...register("quality")}
                   />
                 </Grid>
@@ -454,7 +472,13 @@ const Slab = () => {
                     id="vehicleNo"
                     placeholder="Enter vehicle no"
                     fullWidth
-                    variant="standard"
+                    variant="outlined"
+                    sx={{ maxHeight: 40, marginTop: "2px" }}
+                    inputProps={{
+                      style: {
+                        padding: 5,
+                      },
+                    }}
                     {...register("vehicleNo")}
                   />
                 </Grid>
@@ -514,7 +538,13 @@ const Slab = () => {
                     id="maxSqFeet"
                     placeholder={"Enter Max Sq " + watchTotalAreaUnit}
                     fullWidth
-                    variant="standard"
+                    variant="outlined"
+                    sx={{ maxHeight: 40, marginTop: "2px" }}
+                    inputProps={{
+                      style: {
+                        padding: 5,
+                      },
+                    }}
                     type="number"
                     {...register("maxSqFeet")}
                   />
@@ -526,7 +556,13 @@ const Slab = () => {
                     id="addRows"
                     placeholder="Enter no of rows"
                     helperText="Max 700 rows"
-                    variant="standard"
+                    variant="outlined"
+                    sx={{ maxHeight: 40, marginTop: "2px" }}
+                    inputProps={{
+                      style: {
+                        padding: 5,
+                      },
+                    }}
                     type="number"
                     {...register("addRows")}
                   />
@@ -537,7 +573,13 @@ const Slab = () => {
                     fullWidth
                     id="startingRow"
                     placeholder="Enter starting row"
-                    variant="standard"
+                    variant="outlined"
+                    sx={{ maxHeight: 40, marginTop: "2px" }}
+                    inputProps={{
+                      style: {
+                        padding: 5,
+                      },
+                    }}
                     type="number"
                     {...register("startingRow")}
                   />
@@ -596,6 +638,12 @@ const Slab = () => {
                             key={row.id}
                             sx={{
                               "&:last-child td, &:last-child th": { border: 0 },
+                              "&:nth-of-type(odd)": {
+                                backgroundColor: "#F2F2F2",
+                              },
+                              "&:nth-of-type(even)": {
+                                backgroundColor: "white",
+                              },
                             }}
                           >
                             <TableCell component="th" scope="row">
@@ -603,7 +651,11 @@ const Slab = () => {
                             </TableCell>
                             <TableCell>
                               <input
-                                style={{ width: "50px", border: "none" }}
+                                style={{
+                                  width: "50px",
+                                  border: "none",
+                                  backgroundColor: "transparent",
+                                }}
                                 value={row.length === "0" ? "" : row.length}
                                 placeholder={row.length}
                                 onChange={(e) => {
@@ -657,7 +709,11 @@ const Slab = () => {
                             </TableCell>
                             <TableCell>
                               <input
-                                style={{ width: "50px", border: "none" }}
+                                style={{
+                                  width: "50px",
+                                  border: "none",
+                                  backgroundColor: "transparent",
+                                }}
                                 value={row.width === "0" ? "" : row.width}
                                 placeholder={row.width}
                                 onChange={(e) => {
@@ -767,9 +823,16 @@ const Slab = () => {
                     fullWidth
                     disabled
                     id="totalSqFeet"
-                    variant="standard"
+                    variant="outlined"
+                    inputProps={{
+                      style: {
+                        padding: 5,
+                      },
+                    }}
                     type="number"
                     sx={{
+                      maxHeight: 40,
+                      marginTop: "2px",
                       "& .MuiInputBase-input.Mui-disabled": {
                         WebkitTextFillColor: "#000000",
                       },
@@ -782,7 +845,13 @@ const Slab = () => {
                   <TextField
                     fullWidth
                     id="pricePerSqFeet"
-                    variant="standard"
+                    variant="outlined"
+                    sx={{ maxHeight: 40, marginTop: "2px" }}
+                    inputProps={{
+                      style: {
+                        padding: 5,
+                      },
+                    }}
                     type="number"
                     {...register("pricePerSqFeet")}
                   />
@@ -793,9 +862,16 @@ const Slab = () => {
                     fullWidth
                     disabled
                     id="totalCost"
-                    variant="standard"
+                    variant="outlined"
+                    inputProps={{
+                      style: {
+                        padding: 5,
+                      },
+                    }}
                     type="number"
                     sx={{
+                      maxHeight: 40,
+                      marginTop: "2px",
                       "& .MuiInputBase-input.Mui-disabled": {
                         WebkitTextFillColor: "#000000",
                       },
@@ -944,7 +1020,7 @@ const Slab = () => {
                   sx={{
                     paddingLeft: 0,
                     paddingRight: 0,
-                    marginTop: 20,
+                    marginTop: 10,
                     paddingBottom: 4,
                     borderRadius: 5,
 
@@ -953,6 +1029,7 @@ const Slab = () => {
                   }}
                 >
                   <center>
+                    <img src={logo} style={{ width: "50%", margin: 0 }} />
                     <img
                       src={invoicePic}
                       style={{ width: "100%", objectFit: "cover" }}

@@ -314,12 +314,19 @@ const SideBar = () => {
             </List>
             {user && formList.length > 0 && <Divider />}
             {!user && (
-              <div style={{padding: 5}}><Typography>Please Sign in to save your records.</Typography></div>
+              <div style={{ padding: 5 }}>
+                <Typography>Please Sign in to save your records.</Typography>
+              </div>
             )}
             <div style={{ marginTop: "auto", marginBottom: 8 }}>
               <Menu
                 id="basic-menu"
                 anchorEl={anchorEl}
+                anchorOrigin={{ vertical: "top", horizontal: "left" }}
+                transformOrigin={{
+                  vertical: "bottom",
+                  horizontal: "left",
+                }}
                 open={open}
                 onClose={handleClose}
                 sx={{ marginBottom: 33 }}

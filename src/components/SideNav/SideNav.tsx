@@ -288,6 +288,11 @@ const SideNav = () => {
             <Menu
               id="basic-menu"
               anchorEl={anchorEl}
+              anchorOrigin={{ vertical: "top", horizontal: "left" }}
+              transformOrigin={{
+                vertical: "bottom",
+                horizontal: "left",
+              }}
               open={open}
               onClose={handleClose}
               sx={{ marginBottom: 33 }}
