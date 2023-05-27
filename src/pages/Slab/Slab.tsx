@@ -22,6 +22,8 @@ import {
   InputAdornment,
   IconButton,
   Divider,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 import { Controller, useForm } from "react-hook-form";
@@ -35,7 +37,13 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import MediaQuery from "react-responsive";
 import CloseIcon from "@mui/icons-material/Close";
 import { db } from "../../firebase-config";
-import { addDoc, collection, doc, updateDoc } from "firebase/firestore";
+import {
+  Timestamp,
+  addDoc,
+  collection,
+  doc,
+  updateDoc,
+} from "firebase/firestore";
 import { FormContext } from "../../contexts/FormContext";
 
 const theme = createTheme({
@@ -77,7 +85,8 @@ const obj: tableData = {
 };
 
 const Slab = () => {
-  const { formData, user, fetchData, formList } = useContext(FormContext);
+  const { formData, user, fetchData, formList, setFormData } =
+    useContext(FormContext);
 
   const lastEditedIndex = useRef(-1);
   const idCounter = useRef(1);
@@ -87,6 +96,7 @@ const Slab = () => {
 
   const [showPDF, setShowPDF] = useState(false);
   const [pdfRows, setPdfRows] = useState<any>([]);
+  const [snackBar, setSnackBar] = useState({ open: false, title: "" });
   const [rows, setRows] = useState<tableData[]>(formData.rows);
 
   const [showExitPrompt, setShowExitPrompt] = useExitPrompt(true);
@@ -156,7 +166,7 @@ const Slab = () => {
         default:
           break;
       }
-      calculateTotalArea(4);
+      calculateTotalArea();
       return [...prev];
     });
   };
@@ -210,7 +220,7 @@ const Slab = () => {
       }
       return [...prev];
     });
-    calculateTotalArea(5);
+    calculateTotalArea();
   };
 
   const handleAddRow = (count: any | null) => {
@@ -237,7 +247,7 @@ const Slab = () => {
     }
   };
 
-  const calculateTotalArea = (count: any) => {
+  const calculateTotalArea = () => {
     let total = 0;
     rows.forEach((row) => {
       if (!isNaN(row.area)) {
@@ -256,16 +266,20 @@ const Slab = () => {
     setValue("totalSqFeet", Math.round(total * 100) / 100);
   };
 
-  const handleDownloadPDF = async (count: number) => {
+  const handleDownloadPDF = async () => {
     if (rows.length === 1 && rows[0].length === "0" && rows[0].width === "0") {
       alert("Please fill atleast 1 record");
       return;
     }
-    // await handleSave();
+    if(user) {
+      await handleSave();
+    }
     let netTotal = 0;
     let dataLen = rows.length;
     const pageRows = [];
-    const pages = Math.ceil(finalRow.current / 70);
+    console.log("finalRow:", finalRow.current);
+
+    const pages = Math.ceil(finalRow.current + 1 / 70);
     for (let i = 0; i < pages; i++) {
       let pageTotal = 0;
       if (dataLen >= 70) {
@@ -335,14 +349,22 @@ const Slab = () => {
         alert("Reached Maximum record length 30");
         return;
       }
+      const createdTime = Timestamp.fromDate(new Date());
       const ref = collection(db, `users/${user?.uid}/forms`);
-      await addDoc(ref, postObj);
+      const res = await addDoc(ref, { createdTime, ...postObj });
+      const { rows, title, ...data } = postObj;
+      setFormData({ id: res.id, rows, title, data });
     }
+    setSnackBar({ open: true, title: "Form Saved Successfully" });
     await fetchData();
   };
 
   const handleDialogClose = () => {
     setShowPDF(false);
+  };
+
+  const handleSnackBarClose = () => {
+    setSnackBar({ open: false, title: "" });
   };
 
   return (
@@ -354,6 +376,16 @@ const Slab = () => {
         paddingTop: 1,
       }}
     >
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        open={snackBar.open}
+        autoHideDuration={5000}
+        onClose={handleSnackBarClose}
+      >
+        <Alert onClose={handleSnackBarClose} severity="success">
+          {snackBar.title}
+        </Alert>
+      </Snackbar>
       <Paper elevation={0} sx={{ padding: 1, borderRadius: 5 }}>
         <form>
           <Grid container spacing={3}>
@@ -575,6 +607,8 @@ const Slab = () => {
                                 value={row.length === "0" ? "" : row.length}
                                 placeholder={row.length}
                                 onChange={(e) => {
+                                  console.log("here", i, finalRow.current);
+
                                   lastEditedIndex.current = i;
                                   finalRow.current =
                                     finalRow.current > i ? finalRow.current : i;
@@ -615,7 +649,7 @@ const Slab = () => {
                                         break;
                                     }
                                     prev[i].area = Math.round(area * 100) / 100;
-                                    calculateTotalArea(1);
+                                    calculateTotalArea();
                                     return [...prev];
                                   });
                                 }}
@@ -628,6 +662,7 @@ const Slab = () => {
                                 placeholder={row.width}
                                 onChange={(e) => {
                                   lastEditedIndex.current = i;
+                                  console.log("here1", i, finalRow.current);
                                   finalRow.current =
                                     finalRow.current > i ? finalRow.current : i;
                                   if (!/^\d*\.?\d*$/.test(e.target.value)) {
@@ -668,7 +703,7 @@ const Slab = () => {
                                         break;
                                     }
                                     prev[i].area = Math.round(area * 100) / 100;
-                                    calculateTotalArea(2);
+                                    calculateTotalArea();
                                     return [...prev];
                                   });
                                 }}
@@ -685,7 +720,7 @@ const Slab = () => {
                                       prev[i].length = "---- || ----";
                                       prev[i].area = "---- || ----";
                                       prev[i].sqFeet = "---- || ----";
-                                      calculateTotalArea(3);
+                                      calculateTotalArea();
                                       return [...prev];
                                     });
                                   }}
@@ -776,6 +811,7 @@ const Slab = () => {
                       color="primary"
                       size="large"
                       fullWidth
+                      disabled={!user}
                       onClick={handleSave}
                       style={{
                         borderRadius: "20px 0px 20px 20px",
@@ -795,7 +831,7 @@ const Slab = () => {
                       size="large"
                       fullWidth
                       onClick={() => {
-                        handleDownloadPDF(rows.length);
+                        handleDownloadPDF();
                       }}
                       style={{
                         borderRadius: "20px 0px 20px 20px",
