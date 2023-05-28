@@ -391,16 +391,14 @@ const Slab = () => {
           <Grid container spacing={3}>
             <Grid item xs={12} lg={6}>
               <Grid container spacing={2}>
-                <MediaQuery maxWidth={1223}>
-                  <Grid item xs={12} pb={5} sx={{ paddingBottom: 0 }}>
-                    <div style={{ display: "flex" }}>
-                      <img
-                        src={logo}
-                        style={{ width: 202, height: 60, margin: 0 }}
-                      />
-                    </div>
-                  </Grid>
-                </MediaQuery>
+                <Grid item xs={12} pb={5} sx={{ paddingBottom: 0 }}>
+                  <div style={{ display: "flex" }}>
+                    <img
+                      src={logo}
+                      style={{ width: 202, height: 60, margin: 0 }}
+                    />
+                  </div>
+                </Grid>
                 <Grid item xs={12}>
                   <h1
                     style={{
@@ -1029,7 +1027,6 @@ const Slab = () => {
                   }}
                 >
                   <center>
-                    <img src={logo} style={{ width: "50%", margin: 0 }} />
                     <img
                       src={invoicePic}
                       style={{ width: "100%", objectFit: "cover" }}

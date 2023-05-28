@@ -63,6 +63,7 @@ const style = StyleSheet.create({
     margin: "auto",
     flexDirection: "row",
   },
+
   tableCol: {
     width: "16.66%",
     borderStyle: "solid",
@@ -70,6 +71,7 @@ const style = StyleSheet.create({
     borderLeftWidth: 0,
     borderTopWidth: 0,
   },
+
   tableCellHead: {
     margin: "auto",
     fontWeight: "bold",
@@ -93,7 +95,10 @@ const PdfFile = ({ rowData, invoiceData }: any) => {
   return (
     <Document>
       <Page size={"A4"} style={{}}>
-        <Link style={style.title} src="https://aasma-slab-measurements.netlify.app/">
+        <Link
+          style={style.title}
+          src="https://aasma-slab-measurements.netlify.app/"
+        >
           SLAB MEASUREMENT ESTIMATE
         </Link>
         <View
@@ -106,7 +111,7 @@ const PdfFile = ({ rowData, invoiceData }: any) => {
           }}
         >
           <Text style={style.textBold}>
-            Name of Party:
+            Name of Party:{" "}
             <Text style={style.text}>{invoiceData.partyName}</Text>
           </Text>
           <Text style={style.textBold}>
@@ -254,7 +259,8 @@ const PdfFile = ({ rowData, invoiceData }: any) => {
             <Link src="https://aasmatechin.netlify.app/">
               Aasma Technology Solutions
             </Link>
-            &nbsp; <Image src={copyright}/>2023 - All rights reserved
+            &nbsp; <Image src={copyright} />
+            2023 - All rights reserved
           </Text>
         </View>
       </Page>
@@ -387,7 +393,8 @@ const PdfFile = ({ rowData, invoiceData }: any) => {
                 <Link src="https://aasmatechin.netlify.app/">
                   Aasma Technology Solutions
                 </Link>
-                &nbsp; <Image src={copyright}/>2023 - All rights reserved
+                &nbsp; <Image src={copyright} />
+                2023 - All rights reserved
               </Text>
             </View>
           </Page>
