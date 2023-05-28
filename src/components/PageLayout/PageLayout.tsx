@@ -1,13 +1,27 @@
 import { Outlet } from "react-router-dom";
 import "./PageLayout.scss";
-import { Fab } from "@mui/material";
+import { Box, Fab, ThemeProvider, createTheme } from "@mui/material";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import MediaQuery from "react-responsive";
 import SideNav from "../SideNav/SideNav";
 import SideBar from "../SideBar/SideBar";
 import { FormContextProvider } from "../../contexts/FormContext";
+import logo from "/src/assets/aasmalogonew.png";
+import LinearProgress from "@mui/material/LinearProgress";
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: "#13C9F1",
+    },
+    secondary: {
+      main: "#FFA500",
+    },
+  },
+});
 
 const PageLayout = () => {
+  const isLoading = true;
   return (
     <FormContextProvider>
       <MediaQuery minWidth={1224}>
@@ -17,48 +31,90 @@ const PageLayout = () => {
         <SideBar />
       </MediaQuery>
       <main>
-        <Outlet />
-
-        <MediaQuery minWidth={1224}>
-          <Fab
+        {isLoading ? (
+          <div
+            className="loading"
             style={{
-              position: "fixed",
-              right: "-15px",
-              bottom: "55px",
-              marginRight: "30px",
-
-              textAlign: "center",
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              WebkitTransform: "translate(-50%,-50%)",
+              transform: "translate(-50%,-50%)",
             }}
-            color="success"
-            href="http://api.whatsapp.com/send?phone=+917802813843&text=Slab%20Measurement%20Estimate"
-            target="_blank"
-            rel="noopener noreferrer"
           >
-            <WhatsAppIcon style={{ fontSize: "40px" }} />
-          </Fab>
-        </MediaQuery>
-        <MediaQuery maxWidth={1223}>
-          <Fab
-            style={{
-              position: "fixed",
-              right: "-25px",
-              bottom: "55px",
-              marginRight: "30px",
+            <center>
+              <a
+                href="https://aasmatechin.netlify.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <img src={logo} style={{ width: 202, height: 60, margin: 0 }} />
+              </a>
+              <Box sx={{ width: 202 }}>
+                <ThemeProvider theme={theme}>
+                  <LinearProgress color="primary" />
+                </ThemeProvider>
+              </Box>
+            </center>
+          </div>
+        ) : (
+          <>
+            <Outlet />
+            <MediaQuery minWidth={1224}>
+              <Fab
+                style={{
+                  position: "fixed",
+                  right: "-15px",
+                  bottom: "55px",
+                  marginRight: "30px",
 
-              textAlign: "center",
-            }}
-            color="success"
-            href="http://api.whatsapp.com/send?phone=+917802813843&text=Slab%20Measurement%20Estimate"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <WhatsAppIcon style={{ fontSize: "40px" }} />
-          </Fab>
-        </MediaQuery>
+                  textAlign: "center",
+                }}
+                color="success"
+                href="http://api.whatsapp.com/send?phone=+917802813843&text=Slab%20Measurement%20Estimate"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <WhatsAppIcon style={{ fontSize: "40px" }} />
+              </Fab>
+            </MediaQuery>
+            <MediaQuery maxWidth={1223}>
+              <Fab
+                style={{
+                  position: "fixed",
+                  right: "-25px",
+                  bottom: "55px",
+                  marginRight: "30px",
+
+                  textAlign: "center",
+                }}
+                color="success"
+                href="http://api.whatsapp.com/send?phone=+917802813843&text=Slab%20Measurement%20Estimate"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <WhatsAppIcon style={{ fontSize: "40px" }} />
+              </Fab>
+            </MediaQuery>
+          </>
+        )}
       </main>
 
       <footer>
-        <p>Aasma Technology Solutions © 2023 - All rights reserved</p>
+        <p>
+          <a
+            href="https://aasmatechin.netlify.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              color: "white",
+              textDecoration: "none",
+            }}
+          >
+            Aasma Technology Solutions
+          </a>{" "}
+          © 2023 - All rights reserved
+        </p>
       </footer>
     </FormContextProvider>
   );

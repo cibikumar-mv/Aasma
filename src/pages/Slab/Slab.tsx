@@ -393,10 +393,16 @@ const Slab = () => {
               <Grid container spacing={2}>
                 <Grid item xs={12} pb={5} sx={{ paddingBottom: 0 }}>
                   <div style={{ display: "flex" }}>
-                    <img
-                      src={logo}
-                      style={{ width: 202, height: 60, margin: 0 }}
-                    />
+                    <a
+                      href="https://aasmatechin.netlify.app/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <img
+                        src={logo}
+                        style={{ width: 202, height: 60, margin: 0 }}
+                      />
+                    </a>
                   </div>
                 </Grid>
                 <Grid item xs={12}>

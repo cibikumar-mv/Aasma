@@ -35,10 +35,17 @@ main{
   margin-left: 10rem;
 }
 
+.loading{
+  margin-left: 5rem;
+}
+
 @media screen and (max-width: 1223px) {
   main{
     margin-left: 0;
     margin-top: 50px;
+  }
+  .loading{
+    margin-left: 0;
   }
   footer {
     position: fixed;
