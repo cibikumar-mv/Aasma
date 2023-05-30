@@ -23,6 +23,7 @@ import {
   IconButton,
   Divider,
   Snackbar,
+  DialogContentText,
   Alert,
 } from "@mui/material";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
@@ -36,7 +37,7 @@ import invoicePic from "/src/assets/aasmabg2.jpg";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import MediaQuery from "react-responsive";
 import CloseIcon from "@mui/icons-material/Close";
-import { db } from "../../firebase-config";
+import { analytics, auth, db, googleProvider } from "../../firebase-config";
 import {
   Timestamp,
   addDoc,
@@ -45,6 +46,10 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { FormContext } from "../../contexts/FormContext";
+import GoogleIcon from "@mui/icons-material/Google";
+import { signInWithPopup } from "firebase/auth";
+import { initialState } from "../../contexts/FormContext";
+import { logEvent } from "firebase/analytics";
 
 const theme = createTheme({
   palette: {
@@ -85,19 +90,24 @@ const obj: tableData = {
 };
 
 const Slab = () => {
-  const { formData, user, fetchData, formList, setFormData } =
-    useContext(FormContext);
+  const {
+    formData,
+    user,
+    fetchData,
+    formList,
+    setFormData,
+    isInitialAdd,
+    idCounter,
+  } = useContext(FormContext);
 
   const lastEditedIndex = useRef(-1);
-  const idCounter = useRef(1);
-  const isInitialAdd = useRef(true);
   const showMaxAlert = useRef(true);
-  const finalRow = useRef(-1);
 
   const [showPDF, setShowPDF] = useState(false);
   const [pdfRows, setPdfRows] = useState<any>([]);
   const [snackBar, setSnackBar] = useState({ open: false, title: "" });
   const [rows, setRows] = useState<tableData[]>(formData.rows);
+  const [showGoogleLogin, setShowGoogleLogin] = useState(false);
 
   const [showExitPrompt, setShowExitPrompt] = useExitPrompt(true);
 
@@ -122,9 +132,9 @@ const Slab = () => {
   }, [watchPrice, watchtTotalArea]);
 
   useEffect(() => {
-    console.log("data:", formData);
     reset(formData.data);
     setRows(formData.rows);
+    console.log("datasd:", formData, idCounter.current);
   }, [formData]);
 
   const convertArea = () => {
@@ -190,6 +200,8 @@ const Slab = () => {
     }
 
     for (let i = 0; i < count; i++) {
+      console.log("in loop:", idCounter.current);
+
       idCounter.current += 1;
       array.push({ ...obj, id: idCounter.current, srno: idCounter.current });
     }
@@ -225,8 +237,16 @@ const Slab = () => {
 
   const handleAddRow = (count: any | null) => {
     if (count) {
-      if (rows.length + parseInt(count) > 701) {
+      const totalCount = isInitialAdd.current
+        ? rows.length + parseInt(count) - 1
+        : rows.length + parseInt(count);
+
+      if (totalCount > 700) {
         alert("Maximum limit of 700 reached");
+        return;
+      }
+      if (totalCount > 10 && !user) {
+        setShowGoogleLogin(true);
         return;
       }
       if (isInitialAdd.current) {
@@ -238,12 +258,10 @@ const Slab = () => {
       if (!showExitPrompt) {
         setShowExitPrompt(true);
       }
+      reset(initialState.data);
       setRows(createRandomRow(-1));
       isInitialAdd.current = true;
-      setValue("pricePerSqFeet", 0);
-      setValue("startingRow", "");
-      setValue("addRows", null);
-      showMaxAlert.current = true;
+      idCounter.current = 1;
     }
   };
 
@@ -266,20 +284,33 @@ const Slab = () => {
     setValue("totalSqFeet", Math.round(total * 100) / 100);
   };
 
+  const getLastFilledIndex = () => {
+    let idx = -1;
+    for (let i = 0; i < rows.length; i++) {
+      if (rows[i].length != "0" && rows[i].width != "0") {
+        idx = i;
+      }
+    }
+    return idx + 1;
+  };
+
   const handleDownloadPDF = async () => {
-    if (rows.length === 1 && rows[0].length === "0" && rows[0].width === "0") {
+    const lastFilledIdx = getLastFilledIndex();
+    if (lastFilledIdx === 0) {
       alert("Please fill atleast 1 record");
       return;
     }
+    logEvent(analytics, "pdf_download");
+
     if (user) {
       await handleSave();
     }
     let netTotal = 0;
     let dataLen = rows.length;
     const pageRows = [];
-    console.log("finalRow:", finalRow.current);
+    console.log("lastfilled:", lastEditedIndex);
 
-    const pages = Math.ceil(finalRow.current + 1 / 70);
+    const pages = Math.ceil(lastFilledIdx / 70);
     for (let i = 0; i < pages; i++) {
       let pageTotal = 0;
       if (dataLen >= 70) {
@@ -368,683 +399,724 @@ const Slab = () => {
   };
 
   return (
-    <Box
-      sx={{
-        width: "90%",
-        margin: "auto",
-        paddingBottom: 10,
-        paddingTop: 1,
-      }}
-    >
-      <Snackbar
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-        open={snackBar.open}
-        autoHideDuration={5000}
-        onClose={handleSnackBarClose}
+    <>
+      <Box
+        sx={{
+          width: "90%",
+          margin: "auto",
+          paddingBottom: 10,
+          paddingTop: 1,
+        }}
       >
-        <Alert onClose={handleSnackBarClose} severity="success">
-          {snackBar.title}
-        </Alert>
-      </Snackbar>
-      <Paper elevation={0} sx={{ padding: 1, borderRadius: 5 }}>
-        <form>
-          <Grid container spacing={3}>
-            <Grid item xs={12} lg={6}>
-              <Grid container spacing={2}>
-                <Grid item xs={12} pb={5} sx={{ paddingBottom: 0 }}>
-                  <div style={{ display: "flex" }}>
-                    <a
-                      href="https://aasmatechin.netlify.app/"
-                      target="_blank"
-                      rel="noopener noreferrer"
+        <Snackbar
+          anchorOrigin={{ vertical: "top", horizontal: "right" }}
+          open={snackBar.open}
+          autoHideDuration={5000}
+          onClose={handleSnackBarClose}
+        >
+          <Alert onClose={handleSnackBarClose} severity="success">
+            {snackBar.title}
+          </Alert>
+        </Snackbar>
+        <Paper elevation={0} sx={{ padding: 1, borderRadius: 5 }}>
+          <form>
+            <Grid container spacing={3}>
+              <Grid item xs={12} lg={6}>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} pb={5} sx={{ paddingBottom: 0 }}>
+                    <div style={{ display: "flex" }}>
+                      <a
+                        href="http://www.aasmatech.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <img
+                          src={logo}
+                          style={{ width: 202, height: 60, margin: 0 }}
+                        />
+                      </a>
+                    </div>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <h1
+                      style={{
+                        fontFamily: "Arial",
+                        textAlign: "left",
+                        marginBottom: 5,
+                        marginTop: 0,
+                        fontWeight: "normal",
+                      }}
                     >
-                      <img
-                        src={logo}
-                        style={{ width: 202, height: 60, margin: 0 }}
-                      />
-                    </a>
-                  </div>
-                </Grid>
-                <Grid item xs={12}>
-                  <h1
-                    style={{
-                      fontFamily: "Arial",
-                      textAlign: "left",
-                      marginBottom: 5,
-                      marginTop: 0,
-                      fontWeight: "normal",
-                    }}
-                  >
-                    Slab Measurement Estimate
-                  </h1>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <label>Party Name</label>
-                  <TextField
-                    id="partyName"
-                    placeholder="Enter Party Name"
-                    fullWidth
-                    variant="outlined"
-                    sx={{ maxHeight: 40, marginTop: "2px" }}
-                    inputProps={{
-                      style: {
-                        padding: 5,
-                      },
-                    }}
-                    {...register("partyName")}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <label>Date</label>
-                  <TextField
-                    id="date"
-                    type="date"
-                    fullWidth
-                    variant="outlined"
-                    sx={{ maxHeight: 40, marginTop: "2px" }}
-                    InputProps={{
-                      inputProps: {
-                        max: new Date().toISOString().slice(0, 10),
+                      Slab Measurement Estimate
+                    </h1>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <label>Party Name</label>
+                    <TextField
+                      id="partyName"
+                      placeholder="Enter Party Name"
+                      fullWidth
+                      variant="outlined"
+                      sx={{ maxHeight: 40, marginTop: "2px" }}
+                      inputProps={{
                         style: {
                           padding: 5,
                         },
-                      },
-                    }}
-                    InputLabelProps={{ shrink: true }}
-                    {...register("date")}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <label>Quality</label>
-                  <TextField
-                    id="quality"
-                    placeholder="Enter quality"
-                    fullWidth
-                    variant="outlined"
-                    sx={{ maxHeight: 40, marginTop: "2px" }}
-                    inputProps={{
-                      style: {
-                        padding: 5,
-                      },
-                    }}
-                    {...register("quality")}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <label>Vehicle No</label>
-                  <TextField
-                    id="vehicleNo"
-                    placeholder="Enter vehicle no"
-                    fullWidth
-                    variant="outlined"
-                    sx={{ maxHeight: 40, marginTop: "2px" }}
-                    inputProps={{
-                      style: {
-                        padding: 5,
-                      },
-                    }}
-                    {...register("vehicleNo")}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={7}>
-                  <label>Measurement Unit</label>
-                  <Controller
-                    name="measurementUnit"
-                    control={control}
-                    render={({ field }) => (
-                      <RadioGroup {...field} sx={{ flexDirection: "row" }}>
-                        <FormControlLabel
-                          value="centimeter"
-                          control={<Radio />}
-                          label="Centimeter"
-                        />
-                        <FormControlLabel
-                          value="inches"
-                          control={<Radio />}
-                          label="Inches"
-                        />
-                        <FormControlLabel
-                          value="feet"
-                          control={<Radio />}
-                          label="Feet"
-                        />
-                      </RadioGroup>
-                    )}
-                  ></Controller>
-                </Grid>
-
-                <Grid item xs={12} sm={5}>
-                  <Controller
-                    name="totalAreaUnit"
-                    control={control}
-                    render={({ field }) => (
-                      <>
-                        <label>Total Area Unit</label>
+                      }}
+                      {...register("partyName")}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <label>Date</label>
+                    <TextField
+                      id="date"
+                      type="date"
+                      fullWidth
+                      variant="outlined"
+                      sx={{ maxHeight: 40, marginTop: "2px" }}
+                      InputProps={{
+                        inputProps: {
+                          max: new Date().toISOString().slice(0, 10),
+                          style: {
+                            padding: 5,
+                          },
+                        },
+                      }}
+                      InputLabelProps={{ shrink: true }}
+                      {...register("date")}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <label>Quality</label>
+                    <TextField
+                      id="quality"
+                      placeholder="Enter quality"
+                      fullWidth
+                      variant="outlined"
+                      sx={{ maxHeight: 40, marginTop: "2px" }}
+                      inputProps={{
+                        style: {
+                          padding: 5,
+                        },
+                      }}
+                      {...register("quality")}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <label>Vehicle No</label>
+                    <TextField
+                      id="vehicleNo"
+                      placeholder="Enter vehicle no"
+                      fullWidth
+                      variant="outlined"
+                      sx={{ maxHeight: 40, marginTop: "2px" }}
+                      inputProps={{
+                        style: {
+                          padding: 5,
+                        },
+                      }}
+                      {...register("vehicleNo")}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={7}>
+                    <label>Measurement Unit</label>
+                    <Controller
+                      name="measurementUnit"
+                      control={control}
+                      render={({ field }) => (
                         <RadioGroup {...field} sx={{ flexDirection: "row" }}>
                           <FormControlLabel
-                            value="Feet"
+                            value="centimeter"
                             control={<Radio />}
-                            label="Sq. Feet"
+                            label="Centimeter"
                           />
                           <FormControlLabel
-                            value="Meter"
+                            value="inches"
                             control={<Radio />}
-                            label="Sq. Meter"
+                            label="Inches"
+                          />
+                          <FormControlLabel
+                            value="feet"
+                            control={<Radio />}
+                            label="Feet"
                           />
                         </RadioGroup>
-                      </>
-                    )}
-                  ></Controller>
-                </Grid>
-                <Grid item xs={12} sx={{ marginTop: 1 }}>
-                  <label>{"Max Sq." + watchTotalAreaUnit}</label>
-                  <TextField
-                    id="maxSqFeet"
-                    placeholder={"Enter Max Sq " + watchTotalAreaUnit}
-                    fullWidth
-                    variant="outlined"
-                    sx={{ maxHeight: 40, marginTop: "2px" }}
-                    inputProps={{
-                      style: {
-                        padding: 5,
-                      },
-                    }}
-                    type="number"
-                    {...register("maxSqFeet")}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <label>Add Rows</label>
-                  <TextField
-                    fullWidth
-                    id="addRows"
-                    placeholder="Enter no of rows"
-                    helperText="Max 700 rows"
-                    variant="outlined"
-                    sx={{ maxHeight: 40, marginTop: "2px" }}
-                    inputProps={{
-                      style: {
-                        padding: 5,
-                      },
-                    }}
-                    type="number"
-                    {...register("addRows")}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <label>Starting Row</label>
-                  <TextField
-                    fullWidth
-                    id="startingRow"
-                    placeholder="Enter starting row"
-                    variant="outlined"
-                    sx={{ maxHeight: 40, marginTop: "2px" }}
-                    inputProps={{
-                      style: {
-                        padding: 5,
-                      },
-                    }}
-                    type="number"
-                    {...register("startingRow")}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={2}>
-                  <ThemeProvider theme={theme}>
-                    <Button
-                      disableElevation
-                      variant="contained"
-                      color="primary"
-                      onClick={() => handleAddRow(getValues("addRows"))}
-                      style={{
-                        marginTop: "12px",
-                        borderRadius: 10,
-                        color: "white",
-                      }}
-                      fullWidth
-                    >
-                      Add
-                    </Button>
-                  </ThemeProvider>
-                </Grid>
-                <Grid item xs={12} sm={2}>
-                  <ThemeProvider theme={theme}>
-                    <Button
-                      disableElevation
-                      variant="contained"
-                      color="secondary"
-                      onClick={() => handleAddRow(null)}
-                      style={{
-                        marginTop: "12px",
-                        borderRadius: 10,
-                        color: "white",
-                      }}
-                      fullWidth
-                    >
-                      Reset
-                    </Button>
-                  </ThemeProvider>
-                </Grid>
-                <Grid item xs={12}>
-                  <TableContainer component={Paper} sx={{ maxHeight: 440 }}>
-                    <Table stickyHeader aria-label="simple table">
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>Sr No</TableCell>
-                          <TableCell>Length</TableCell>
-                          <TableCell>Width</TableCell>
-                          <TableCell>{"Sq. " + watchTotalAreaUnit}</TableCell>
-                          <TableCell></TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {rows.map((row, i) => (
-                          <TableRow
-                            key={row.id}
-                            sx={{
-                              "&:last-child td, &:last-child th": { border: 0 },
-                              "&:nth-of-type(odd)": {
-                                backgroundColor: "#F2F2F2",
-                              },
-                              "&:nth-of-type(even)": {
-                                backgroundColor: "white",
-                              },
-                            }}
-                          >
-                            <TableCell component="th" scope="row">
-                              {row.srno}
-                            </TableCell>
-                            <TableCell>
-                              <input
-                                style={{
-                                  width: "50px",
-                                  border: "none",
-                                  backgroundColor: "transparent",
-                                }}
-                                value={row.length === "0" ? "" : row.length}
-                                placeholder={row.length}
-                                onChange={(e) => {
-                                  console.log("here", i, finalRow.current);
+                      )}
+                    ></Controller>
+                  </Grid>
 
-                                  lastEditedIndex.current = i;
-                                  finalRow.current =
-                                    finalRow.current > i ? finalRow.current : i;
-                                  if (!/^\d*\.?\d*$/.test(e.target.value)) {
-                                    return;
-                                  }
-                                  const aUnit = getValues("totalAreaUnit");
-                                  const mUnit = getValues("measurementUnit");
-                                  setRows((prev) => {
-                                    prev[i].length = e.target.value;
-                                    prev[i].sqFeet =
-                                      parseFloat(prev[i].length) *
-                                      parseFloat(prev[i].width);
-                                    let area = 0;
-                                    switch (mUnit) {
-                                      case "centimeter":
-                                        area =
-                                          prev[i].sqFeet *
-                                          (aUnit === "Feet"
-                                            ? Convert.CmtoFeet
-                                            : Convert.CmtoMeter);
-                                        break;
-                                      case "feet":
-                                        area =
-                                          prev[i].sqFeet *
-                                          (aUnit === "Feet"
-                                            ? Convert.MeterToFeet
-                                            : Convert.FeetToMeter);
-                                        break;
-                                      case "inches":
-                                        area =
-                                          prev[i].sqFeet *
-                                          (aUnit === "Feet"
-                                            ? Convert.InchToFeet
-                                            : Convert.InchToMeter);
-                                        break;
-                                      default:
-                                        break;
+                  <Grid item xs={12} sm={5}>
+                    <Controller
+                      name="totalAreaUnit"
+                      control={control}
+                      render={({ field }) => (
+                        <>
+                          <label>Total Area Unit</label>
+                          <RadioGroup {...field} sx={{ flexDirection: "row" }}>
+                            <FormControlLabel
+                              value="Feet"
+                              control={<Radio />}
+                              label="Sq. Feet"
+                            />
+                            <FormControlLabel
+                              value="Meter"
+                              control={<Radio />}
+                              label="Sq. Meter"
+                            />
+                          </RadioGroup>
+                        </>
+                      )}
+                    ></Controller>
+                  </Grid>
+                  <Grid item xs={12} sx={{ marginTop: 1 }}>
+                    <label>{"Max Sq." + watchTotalAreaUnit}</label>
+                    <TextField
+                      id="maxSqFeet"
+                      placeholder={"Enter Max Sq " + watchTotalAreaUnit}
+                      fullWidth
+                      variant="outlined"
+                      sx={{ maxHeight: 40, marginTop: "2px" }}
+                      inputProps={{
+                        min: 0,
+                        style: {
+                          padding: 5,
+                        },
+                      }}
+                      type="number"
+                      {...register("maxSqFeet")}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <label>Add Rows</label>
+                    <TextField
+                      fullWidth
+                      id="addRows"
+                      placeholder="Enter no of rows"
+                      helperText="Max 700 rows"
+                      variant="outlined"
+                      sx={{ maxHeight: 40, marginTop: "2px" }}
+                      inputProps={{
+                        min: 1,
+                        style: {
+                          padding: 5,
+                        },
+                      }}
+                      type="number"
+                      {...register("addRows")}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <label>Starting Row</label>
+                    <TextField
+                      fullWidth
+                      id="startingRow"
+                      placeholder="Enter starting row"
+                      variant="outlined"
+                      sx={{ maxHeight: 40, marginTop: "2px" }}
+                      inputProps={{
+                        min: 1,
+                        style: {
+                          padding: 5,
+                        },
+                      }}
+                      type="number"
+                      {...register("startingRow")}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={2}>
+                    <ThemeProvider theme={theme}>
+                      <Button
+                        disableElevation
+                        variant="contained"
+                        color="primary"
+                        onClick={() => handleAddRow(getValues("addRows"))}
+                        style={{
+                          marginTop: "12px",
+                          borderRadius: 10,
+                          color: "white",
+                        }}
+                        fullWidth
+                      >
+                        Add
+                      </Button>
+                    </ThemeProvider>
+                  </Grid>
+                  <Grid item xs={12} sm={2}>
+                    <ThemeProvider theme={theme}>
+                      <Button
+                        disableElevation
+                        variant="contained"
+                        color="secondary"
+                        onClick={() => {
+                          setValue("startingRow", "");
+                          setValue("addRows", null);
+                          setValue("totalSqFeet", 0);
+                          setValue("pricePerSqFeet", 0);
+                          setRows(createRandomRow(-1));
+                          idCounter.current = 1;
+                          isInitialAdd.current = true;
+                        }}
+                        style={{
+                          marginTop: "12px",
+                          borderRadius: 10,
+                          color: "white",
+                        }}
+                        fullWidth
+                      >
+                        Reset
+                      </Button>
+                    </ThemeProvider>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TableContainer component={Paper} sx={{ maxHeight: 440 }}>
+                      <Table stickyHeader aria-label="simple table">
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>Sr No</TableCell>
+                            <TableCell>Length</TableCell>
+                            <TableCell>Width</TableCell>
+                            <TableCell>{"Sq. " + watchTotalAreaUnit}</TableCell>
+                            <TableCell></TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {rows.map((row, i) => (
+                            <TableRow
+                              key={row.id}
+                              sx={{
+                                "&:last-child td, &:last-child th": {
+                                  border: 0,
+                                },
+                                "&:nth-of-type(odd)": {
+                                  backgroundColor: "#F2F2F2",
+                                },
+                                "&:nth-of-type(even)": {
+                                  backgroundColor: "white",
+                                },
+                              }}
+                            >
+                              <TableCell component="th" scope="row">
+                                {row.srno}
+                              </TableCell>
+                              <TableCell>
+                                <input
+                                  style={{
+                                    width: "50px",
+                                    border: "none",
+                                    backgroundColor: "transparent",
+                                  }}
+                                  type="number"
+                                  value={row.length === "0" ? "" : row.length}
+                                  placeholder={row.length}
+                                  onChange={(e) => {
+                                    lastEditedIndex.current = i;
+                                    if (!/^\d*\.?\d*$/.test(e.target.value)) {
+                                      return;
                                     }
-                                    prev[i].area = Math.round(area * 100) / 100;
-                                    calculateTotalArea();
-                                    return [...prev];
-                                  });
-                                }}
-                              />
-                            </TableCell>
-                            <TableCell>
-                              <input
-                                style={{
-                                  width: "50px",
-                                  border: "none",
-                                  backgroundColor: "transparent",
-                                }}
-                                value={row.width === "0" ? "" : row.width}
-                                placeholder={row.width}
-                                onChange={(e) => {
-                                  lastEditedIndex.current = i;
-                                  console.log("here1", i, finalRow.current);
-                                  finalRow.current =
-                                    finalRow.current > i ? finalRow.current : i;
-                                  if (!/^\d*\.?\d*$/.test(e.target.value)) {
-                                    return;
-                                  }
-                                  const aUnit = getValues("totalAreaUnit");
-                                  const mUnit = getValues("measurementUnit");
-
-                                  setRows((prev) => {
-                                    prev[i].width = e.target.value;
-                                    prev[i].sqFeet =
-                                      parseFloat(prev[i].length) *
-                                      parseFloat(prev[i].width);
-                                    let area = 0;
-                                    switch (mUnit) {
-                                      case "centimeter":
-                                        area =
-                                          prev[i].sqFeet *
-                                          (aUnit === "Feet"
-                                            ? Convert.CmtoFeet
-                                            : Convert.CmtoMeter);
-                                        break;
-                                      case "feet":
-                                        area =
-                                          prev[i].sqFeet *
-                                          (aUnit === "Feet"
-                                            ? Convert.MeterToFeet
-                                            : Convert.FeetToMeter);
-                                        break;
-                                      case "inches":
-                                        area =
-                                          prev[i].sqFeet *
-                                          (aUnit === "Feet"
-                                            ? Convert.InchToFeet
-                                            : Convert.InchToMeter);
-                                        break;
-                                      default:
-                                        break;
-                                    }
-                                    prev[i].area = Math.round(area * 100) / 100;
-                                    calculateTotalArea();
-                                    return [...prev];
-                                  });
-                                }}
-                              />
-                            </TableCell>
-                            <TableCell>{row.area}</TableCell>
-                            <TableCell>
-                              {i != 0 && (
-                                <div
-                                  style={{ cursor: "pointer" }}
-                                  onClick={() => {
+                                    const aUnit = getValues("totalAreaUnit");
+                                    const mUnit = getValues("measurementUnit");
                                     setRows((prev) => {
-                                      prev[i].width = "---- || ----";
-                                      prev[i].length = "---- || ----";
-                                      prev[i].area = "---- || ----";
-                                      prev[i].sqFeet = "---- || ----";
+                                      prev[i].length = e.target.value;
+                                      prev[i].sqFeet =
+                                        parseFloat(prev[i].length) *
+                                        parseFloat(prev[i].width);
+                                      let area = 0;
+                                      switch (mUnit) {
+                                        case "centimeter":
+                                          area =
+                                            prev[i].sqFeet *
+                                            (aUnit === "Feet"
+                                              ? Convert.CmtoFeet
+                                              : Convert.CmtoMeter);
+                                          break;
+                                        case "feet":
+                                          area =
+                                            prev[i].sqFeet *
+                                            (aUnit === "Feet"
+                                              ? Convert.MeterToFeet
+                                              : Convert.FeetToMeter);
+                                          break;
+                                        case "inches":
+                                          area =
+                                            prev[i].sqFeet *
+                                            (aUnit === "Feet"
+                                              ? Convert.InchToFeet
+                                              : Convert.InchToMeter);
+                                          break;
+                                        default:
+                                          break;
+                                      }
+                                      prev[i].area =
+                                        Math.round(area * 100) / 100;
                                       calculateTotalArea();
                                       return [...prev];
                                     });
                                   }}
-                                >
-                                  <CancelOutlinedIcon />
-                                </div>
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </Grid>
-                <Grid item xs={12}>
-                  <OutlinedInput
-                    size="small"
-                    sx={{
-                      width: 90,
-                      float: "right",
-                      borderRadius: 4,
-                    }}
-                    id="outlined-adornment-password"
-                    {...register("repeatCount")}
-                    autoComplete="off"
-                    endAdornment={
-                      <InputAdornment position="end">
-                        <IconButton
-                          aria-label="toggle password visibility"
-                          onClick={() => {
-                            handleRepeatValues();
-                          }}
-                          edge="end"
-                        >
-                          <ContentCopyIcon />
-                        </IconButton>
-                      </InputAdornment>
-                    }
-                  />
-                </Grid>
-                <Grid item xs={12} md={4}>
-                  <label>{"Total Sq. " + watchTotalAreaUnit}</label>
-                  <TextField
-                    fullWidth
-                    disabled
-                    id="totalSqFeet"
-                    variant="outlined"
-                    inputProps={{
-                      style: {
-                        padding: 5,
-                      },
-                    }}
-                    type="number"
-                    sx={{
-                      maxHeight: 40,
-                      marginTop: "2px",
-                      "& .MuiInputBase-input.Mui-disabled": {
-                        WebkitTextFillColor: "#000000",
-                      },
-                    }}
-                    {...register("totalSqFeet")}
-                  />
-                </Grid>
-                <Grid item xs={12} md={4}>
-                  <label>{"Price/Per Sq. " + watchTotalAreaUnit}</label>
-                  <TextField
-                    fullWidth
-                    id="pricePerSqFeet"
-                    variant="outlined"
-                    sx={{ maxHeight: 40, marginTop: "2px" }}
-                    inputProps={{
-                      style: {
-                        padding: 5,
-                      },
-                    }}
-                    type="number"
-                    {...register("pricePerSqFeet")}
-                  />
-                </Grid>
-                <Grid item xs={12} md={4}>
-                  <label>Total Cost</label>
-                  <TextField
-                    fullWidth
-                    disabled
-                    id="totalCost"
-                    variant="outlined"
-                    inputProps={{
-                      style: {
-                        padding: 5,
-                      },
-                    }}
-                    type="number"
-                    sx={{
-                      maxHeight: 40,
-                      marginTop: "2px",
-                      "& .MuiInputBase-input.Mui-disabled": {
-                        WebkitTextFillColor: "#000000",
-                      },
-                    }}
-                    {...register("totalCost")}
-                  />
-                </Grid>
-                <Grid item xs={12} md={4}>
-                  <ThemeProvider theme={theme}>
-                    <Button
-                      disableElevation
-                      variant="contained"
-                      color="primary"
-                      size="large"
+                                />
+                              </TableCell>
+                              <TableCell>
+                                <input
+                                  style={{
+                                    width: "50px",
+                                    border: "none",
+                                    backgroundColor: "transparent",
+                                  }}
+                                  type="number"
+                                  value={row.width === "0" ? "" : row.width}
+                                  placeholder={row.width}
+                                  onChange={(e) => {
+                                    lastEditedIndex.current = i;
+                                    if (!/^\d*\.?\d*$/.test(e.target.value)) {
+                                      return;
+                                    }
+                                    const aUnit = getValues("totalAreaUnit");
+                                    const mUnit = getValues("measurementUnit");
+
+                                    setRows((prev) => {
+                                      prev[i].width = e.target.value;
+                                      prev[i].sqFeet =
+                                        parseFloat(prev[i].length) *
+                                        parseFloat(prev[i].width);
+                                      let area = 0;
+                                      switch (mUnit) {
+                                        case "centimeter":
+                                          area =
+                                            prev[i].sqFeet *
+                                            (aUnit === "Feet"
+                                              ? Convert.CmtoFeet
+                                              : Convert.CmtoMeter);
+                                          break;
+                                        case "feet":
+                                          area =
+                                            prev[i].sqFeet *
+                                            (aUnit === "Feet"
+                                              ? Convert.MeterToFeet
+                                              : Convert.FeetToMeter);
+                                          break;
+                                        case "inches":
+                                          area =
+                                            prev[i].sqFeet *
+                                            (aUnit === "Feet"
+                                              ? Convert.InchToFeet
+                                              : Convert.InchToMeter);
+                                          break;
+                                        default:
+                                          break;
+                                      }
+                                      prev[i].area =
+                                        Math.round(area * 100) / 100;
+                                      calculateTotalArea();
+                                      return [...prev];
+                                    });
+                                  }}
+                                />
+                              </TableCell>
+                              <TableCell>{row.area}</TableCell>
+                              <TableCell>
+                                {i != 0 && (
+                                  <div
+                                    style={{ cursor: "pointer" }}
+                                    onClick={() => {
+                                      setRows((prev) => {
+                                        prev[i].width = "---- || ----";
+                                        prev[i].length = "---- || ----";
+                                        prev[i].area = "---- || ----";
+                                        prev[i].sqFeet = "---- || ----";
+                                        calculateTotalArea();
+                                        return [...prev];
+                                      });
+                                    }}
+                                  >
+                                    <CancelOutlinedIcon />
+                                  </div>
+                                )}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <OutlinedInput
+                      size="small"
+                      sx={{
+                        width: 90,
+                        float: "right",
+                        borderRadius: 4,
+                      }}
+                      id="outlined-adornment-password"
+                      {...register("repeatCount")}
+                      autoComplete="off"
+                      endAdornment={
+                        <InputAdornment position="end">
+                          <IconButton
+                            aria-label="toggle password visibility"
+                            onClick={() => {
+                              handleRepeatValues();
+                            }}
+                            edge="end"
+                          >
+                            <ContentCopyIcon />
+                          </IconButton>
+                        </InputAdornment>
+                      }
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={4}>
+                    <label>{"Total Sq. " + watchTotalAreaUnit}</label>
+                    <TextField
                       fullWidth
-                      disabled={!user}
-                      onClick={handleSave}
-                      style={{
-                        borderRadius: "20px 0px 20px 20px",
-                        color: "white",
+                      disabled
+                      id="totalSqFeet"
+                      variant="outlined"
+                      inputProps={{
+                        style: {
+                          padding: 5,
+                        },
                       }}
-                    >
-                      Save
-                    </Button>
-                  </ThemeProvider>
-                </Grid>
-                <Grid item xs={12} md={4}>
-                  <ThemeProvider theme={theme}>
-                    <Button
-                      disableElevation
-                      variant="contained"
-                      color="primary"
-                      size="large"
+                      type="number"
+                      sx={{
+                        maxHeight: 40,
+                        marginTop: "2px",
+                        "& .MuiInputBase-input.Mui-disabled": {
+                          WebkitTextFillColor: "#000000",
+                        },
+                      }}
+                      {...register("totalSqFeet")}
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={4}>
+                    <label>{"Price/Per Sq. " + watchTotalAreaUnit}</label>
+                    <TextField
                       fullWidth
-                      onClick={() => {
-                        handleDownloadPDF();
+                      id="pricePerSqFeet"
+                      variant="outlined"
+                      sx={{ maxHeight: 40, marginTop: "2px" }}
+                      inputProps={{
+                        min: 1,
+                        style: {
+                          padding: 5,
+                        },
                       }}
-                      style={{
-                        borderRadius: "20px 0px 20px 20px",
-                        color: "white",
+                      type="number"
+                      {...register("pricePerSqFeet")}
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={4}>
+                    <label>Total Cost</label>
+                    <TextField
+                      fullWidth
+                      disabled
+                      id="totalCost"
+                      variant="outlined"
+                      inputProps={{
+                        style: {
+                          padding: 5,
+                        },
                       }}
-                    >
-                      Generate PDF
-                    </Button>
-                  </ThemeProvider>
-                </Grid>
-                <Dialog
-                  open={showPDF}
-                  onClose={handleDialogClose}
-                  aria-labelledby="alert-dialog-title"
-                  aria-describedby="alert-dialog-description"
-                  style={{ borderRadius: 50 }}
-                  PaperProps={{
-                    style: { borderRadius: 15, width: "300px" },
-                  }}
-                >
-                  <DialogTitle
-                    style={{ backgroundColor: "#f9f9fa" }}
-                    sx={{ m: 0, p: 2 }}
-                  >
-                    PDF Created!
-                    {handleDialogClose ? (
-                      <IconButton
-                        aria-label="close"
-                        onClick={handleDialogClose}
-                        sx={{
-                          position: "absolute",
-                          right: 8,
-                          top: 10,
-                          color: (theme) => theme.palette.grey[500],
+                      type="number"
+                      sx={{
+                        maxHeight: 40,
+                        marginTop: "2px",
+                        "& .MuiInputBase-input.Mui-disabled": {
+                          WebkitTextFillColor: "#000000",
+                        },
+                      }}
+                      {...register("totalCost")}
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={4}>
+                    <ThemeProvider theme={theme}>
+                      <Button
+                        disableElevation
+                        variant="contained"
+                        color="primary"
+                        size="large"
+                        fullWidth
+                        disabled={!user}
+                        onClick={handleSave}
+                        style={{
+                          borderRadius: "20px 0px 20px 20px",
+                          color: "white",
                         }}
                       >
-                        <CloseIcon />
-                      </IconButton>
-                    ) : null}
-                  </DialogTitle>
-                  <Divider />
-                  <center>
-                    <DialogContent>
-                      <PDFDownloadLink
-                        document={
-                          <PdfFile
-                            invoiceData={getValues()}
-                            rowData={pdfRows}
-                          />
-                        }
-                        fileName="Slab _Measurement_Estimate"
+                        Save
+                      </Button>
+                    </ThemeProvider>
+                  </Grid>
+                  <Grid item xs={12} md={4}>
+                    <ThemeProvider theme={theme}>
+                      <Button
+                        disableElevation
+                        variant="contained"
+                        color="primary"
+                        size="large"
+                        fullWidth
+                        onClick={() => {
+                          handleDownloadPDF();
+                        }}
+                        style={{
+                          borderRadius: "20px 0px 20px 20px",
+                          color: "white",
+                        }}
                       >
-                        {({ loading }) =>
-                          loading ? (
-                            <ThemeProvider theme={theme}>
-                              <Button
-                                autoFocus
-                                variant="contained"
-                                color="primary"
-                                style={{ borderRadius: 10, color: "white" }}
-                              >
-                                Preparing...
-                              </Button>
-                            </ThemeProvider>
-                          ) : (
-                            <ThemeProvider theme={theme}>
-                              <Button
-                                variant="contained"
-                                autoFocus
-                                fullWidth
-                                color="primary"
-                                style={{ borderRadius: 10, color: "white" }}
-                              >
-                                Download PDF
-                              </Button>
-                            </ThemeProvider>
-                          )
-                        }
-                      </PDFDownloadLink>
-                    </DialogContent>
-                  </center>
-                </Dialog>
-                <Grid item xs={12} md={4}>
-                  <ThemeProvider theme={theme}>
-                    <Button
-                      disableElevation
-                      variant="contained"
-                      color="secondary"
-                      fullWidth
-                      size="large"
-                      onClick={() => {
-                        reset();
-                        handleAddRow(null);
-                      }}
-                      style={{
-                        borderRadius: "20px 0px 20px 20px",
-                        color: "white",
-                      }}
+                        Generate PDF
+                      </Button>
+                    </ThemeProvider>
+                  </Grid>
+                  <Dialog
+                    open={showPDF}
+                    onClose={handleDialogClose}
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description"
+                    style={{ borderRadius: 50 }}
+                    PaperProps={{
+                      style: { borderRadius: 15, width: "300px" },
+                    }}
+                  >
+                    <DialogTitle
+                      style={{ backgroundColor: "#f9f9fa" }}
+                      sx={{ m: 0, p: 2 }}
                     >
-                      Reset Form
-                    </Button>
-                  </ThemeProvider>
+                      PDF Created!
+                      {handleDialogClose ? (
+                        <IconButton
+                          aria-label="close"
+                          onClick={handleDialogClose}
+                          sx={{
+                            position: "absolute",
+                            right: 8,
+                            top: 10,
+                            color: (theme) => theme.palette.grey[500],
+                          }}
+                        >
+                          <CloseIcon />
+                        </IconButton>
+                      ) : null}
+                    </DialogTitle>
+                    <Divider />
+                    <center>
+                      <DialogContent>
+                        <PDFDownloadLink
+                          document={
+                            <PdfFile
+                              invoiceData={getValues()}
+                              rowData={pdfRows}
+                            />
+                          }
+                          fileName="Slab _Measurement_Estimate"
+                        >
+                          {({ loading }) =>
+                            loading ? (
+                              <ThemeProvider theme={theme}>
+                                <Button
+                                  autoFocus
+                                  variant="contained"
+                                  color="primary"
+                                  style={{ borderRadius: 10, color: "white" }}
+                                >
+                                  Preparing...
+                                </Button>
+                              </ThemeProvider>
+                            ) : (
+                              <ThemeProvider theme={theme}>
+                                <Button
+                                  variant="contained"
+                                  autoFocus
+                                  fullWidth
+                                  color="primary"
+                                  style={{ borderRadius: 10, color: "white" }}
+                                >
+                                  Download PDF
+                                </Button>
+                              </ThemeProvider>
+                            )
+                          }
+                        </PDFDownloadLink>
+                      </DialogContent>
+                    </center>
+                  </Dialog>
+                  <Grid item xs={12} md={4}>
+                    <ThemeProvider theme={theme}>
+                      <Button
+                        disableElevation
+                        variant="contained"
+                        color="secondary"
+                        fullWidth
+                        size="large"
+                        onClick={() => {
+                          reset();
+                          handleAddRow(null);
+                        }}
+                        style={{
+                          borderRadius: "20px 0px 20px 20px",
+                          color: "white",
+                        }}
+                      >
+                        Reset Form
+                      </Button>
+                    </ThemeProvider>
+                  </Grid>
                 </Grid>
               </Grid>
-            </Grid>
-            <MediaQuery minWidth={1224}>
-              <Grid item xs={12} lg={6} marginBottom={0}>
-                <Paper
-                  elevation={0}
-                  sx={{
-                    paddingLeft: 0,
-                    paddingRight: 0,
-                    marginTop: 10,
-                    paddingBottom: 4,
-                    borderRadius: 5,
+              <MediaQuery minWidth={1224}>
+                <Grid item xs={12} lg={6} marginBottom={0}>
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      paddingLeft: 0,
+                      paddingRight: 0,
+                      marginTop: 10,
+                      paddingBottom: 4,
+                      borderRadius: 5,
 
-                    height: "100%",
-                    backgroundColor: "#ffffff",
-                  }}
-                >
-                  <center>
-                    <img
-                      src={invoicePic}
-                      style={{ width: "100%", objectFit: "cover" }}
-                    />
-                  </center>
-                </Paper>
-              </Grid>
-            </MediaQuery>
-          </Grid>
-        </form>
-      </Paper>
-    </Box>
+                      height: "100%",
+                      backgroundColor: "#ffffff",
+                    }}
+                  >
+                    <center>
+                      <img
+                        src={invoicePic}
+                        style={{ width: "100%", objectFit: "cover" }}
+                      />
+                    </center>
+                  </Paper>
+                </Grid>
+              </MediaQuery>
+            </Grid>
+          </form>
+        </Paper>
+      </Box>
+
+      <Dialog
+        open={showGoogleLogin}
+        onClose={() => {
+          setShowGoogleLogin(false);
+        }}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">Sign In</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Please sign in to continue adding more than 10 rows
+          </DialogContentText>
+          <Button
+            onClick={async () => {
+              await signInWithPopup(auth, googleProvider);
+              setShowGoogleLogin(false);
+            }}
+            startIcon={<GoogleIcon fontSize="small" />}
+            variant="outlined"
+            fullWidth
+            sx={{ marginTop: 4 }}
+          >
+            Google Sign In
+          </Button>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 

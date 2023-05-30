@@ -62,6 +62,7 @@ const style = StyleSheet.create({
   tableRow: {
     margin: "auto",
     flexDirection: "row",
+    backgroundColor: "#fff",
   },
 
   tableCol: {
@@ -82,6 +83,12 @@ const style = StyleSheet.create({
     margin: "auto",
     marginTop: 5,
     fontSize: 10,
+  },
+  evenRow: {
+    backgroundColor: "#f2f2f2",
+  },
+  oddRow: {
+    backgroundColor: "#fff",
   },
   footer: {
     marginTop: 55,
@@ -170,7 +177,12 @@ const PdfFile = ({ rowData, invoiceData }: any) => {
             </View>
             {rowData[0].rows.slice(0, 35).map((d: tableData, i: number) => {
               return (
-                <View style={style.tableRow}>
+                <View
+                  style={[
+                    style.tableRow,
+                    i % 2 === 0 ? style.evenRow : style.oddRow,
+                  ]}
+                >
                   <View style={style.tableCol}>
                     <Text style={style.tableCell}>{d?.srno}</Text>
                   </View>
@@ -256,7 +268,7 @@ const PdfFile = ({ rowData, invoiceData }: any) => {
           }}
         >
           <Text style={style.footer}>
-            <Link src="https://aasmatechin.netlify.app/">
+            <Link src="http://www.aasmatech.com">
               Aasma Technology Solutions
             </Link>
             &nbsp; <Image src={copyright} />
@@ -302,7 +314,12 @@ const PdfFile = ({ rowData, invoiceData }: any) => {
                 </View>
                 {row.rows.slice(0, 35).map((d: tableData, i: number) => {
                   return (
-                    <View style={style.tableRow}>
+                    <View
+                      style={[
+                        style.tableRow,
+                        i % 2 === 0 ? style.evenRow : style.oddRow,
+                      ]}
+                    >
                       <View style={style.tableCol}>
                         <Text style={style.tableCell}>{d?.srno}</Text>
                       </View>
@@ -390,7 +407,7 @@ const PdfFile = ({ rowData, invoiceData }: any) => {
               }}
             >
               <Text style={style.footer}>
-                <Link src="https://aasmatechin.netlify.app/">
+                <Link src="http://www.aasmatech.com">
                   Aasma Technology Solutions
                 </Link>
                 &nbsp; <Image src={copyright} />

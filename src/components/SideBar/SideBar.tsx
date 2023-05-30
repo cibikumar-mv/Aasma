@@ -20,6 +20,11 @@ import {
   createTheme,
   Snackbar,
   Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
 import { useContext, useEffect, useState } from "react";
@@ -40,8 +45,17 @@ const SideBar = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const { register, getValues } = useForm();
   const open = Boolean(anchorEl);
-  const { setFormData, user, formList, fetchData, newForm, formData } =
-    useContext(FormContext);
+  const {
+    setFormData,
+    user,
+    formList,
+    fetchData,
+    newForm,
+    formData,
+    clearForms,
+    isInitialAdd,
+    idCounter
+  } = useContext(FormContext);
   const handleGoogleClick = async (
     event: React.MouseEvent<HTMLButtonElement>
   ) => {
@@ -50,9 +64,6 @@ const SideBar = () => {
     } else {
       await signInWithPopup(auth, googleProvider);
     }
-  };
-  const handleClose = () => {
-    setAnchorEl(null);
   };
   const handleLogout = async () => {
     await signOut(auth);
@@ -91,7 +102,7 @@ const SideBar = () => {
   const [action, setaction] = useState("false");
   const [enableText, setenableText] = useState("false");
   const [selectedIndex, setSelectedIndex] = useState(-1);
-
+  const [showDialog, setShowDialog] = useState(false);
   const [snackBar, setSnackBar] = useState({ open: false, title: "" });
 
   useEffect(() => {
@@ -109,7 +120,19 @@ const SideBar = () => {
   const handleSetForm = (form: any, i: number) => {
     setSelectedIndex(i);
     const { rows, id, title, ...data } = form;
+    idCounter.current = rows.length;
+    isInitialAdd.current = false;
     setFormData({ rows, data, id, title });
+  };
+
+  const handleClearForm = async (event: any) => {
+    console.log("enve:", event);
+    console.log("enve:", event.target.textContent === "DELETE ALL");
+    if (event.target.textContent === "DELETE ALL") {
+      await clearForms();
+    }
+    setShowDialog(false);
+    setAnchorEl(null);
   };
 
   return (
@@ -328,17 +351,23 @@ const SideBar = () => {
                   horizontal: "left",
                 }}
                 open={open}
-                onClose={handleClose}
+                onClose={() => {
+                  setAnchorEl(null);
+                }}
                 sx={{ marginBottom: 33 }}
                 MenuListProps={{
                   "aria-labelledby": "basic-button",
                 }}
               >
-                <MenuItem onClick={handleClose}>
+                <MenuItem
+                  onClick={() => {
+                    setShowDialog(true);
+                  }}
+                >
                   <ListItemIcon>
                     <DeleteOutlineIcon fontSize="small" />
                   </ListItemIcon>
-                  <ListItemText>Clear Forms</ListItemText>
+                  <ListItemText>Clear All Forms</ListItemText>
                 </MenuItem>
                 <Divider />
                 <MenuItem onClick={handleLogout}>
@@ -388,6 +417,25 @@ const SideBar = () => {
           {snackBar.title}
         </Alert>
       </Snackbar>
+      <Dialog
+        open={showDialog}
+        onClose={handleClearForm}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">Delete all Forms</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure you want to clear all forms?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClearForm}>No</Button>
+          <Button onClick={handleClearForm} autoFocus>
+            DELETE ALL
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };

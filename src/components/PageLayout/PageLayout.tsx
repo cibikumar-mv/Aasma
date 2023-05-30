@@ -5,9 +5,10 @@ import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import MediaQuery from "react-responsive";
 import SideNav from "../SideNav/SideNav";
 import SideBar from "../SideBar/SideBar";
-import { FormContextProvider } from "../../contexts/FormContext";
+import { FormContext, FormContextProvider } from "../../contexts/FormContext";
 import logo from "/src/assets/aasmalogonew.png";
 import LinearProgress from "@mui/material/LinearProgress";
+import { useContext } from "react";
 
 const theme = createTheme({
   palette: {
@@ -21,9 +22,9 @@ const theme = createTheme({
 });
 
 const PageLayout = () => {
-  const isLoading = true;
+  const { loading } = useContext(FormContext);
   return (
-    <FormContextProvider>
+    <>
       <MediaQuery minWidth={1224}>
         <SideNav />
       </MediaQuery>
@@ -31,7 +32,7 @@ const PageLayout = () => {
         <SideBar />
       </MediaQuery>
       <main>
-        {isLoading ? (
+        {loading ? (
           <div
             className="loading"
             style={{
@@ -44,7 +45,7 @@ const PageLayout = () => {
           >
             <center>
               <a
-                href="https://aasmatechin.netlify.app/"
+                href="http://www.aasmatech.com"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -103,7 +104,7 @@ const PageLayout = () => {
       <footer>
         <p>
           <a
-            href="https://aasmatechin.netlify.app/"
+            href="http://www.aasmatech.com"
             target="_blank"
             rel="noopener noreferrer"
             style={{
@@ -116,7 +117,7 @@ const PageLayout = () => {
           © 2023 - All rights reserved
         </p>
       </footer>
-    </FormContextProvider>
+    </>
   );
 };
 

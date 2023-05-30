@@ -21,6 +21,11 @@ import {
   Snackbar,
   Alert,
   Typography,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
 import { useContext, useEffect, useState } from "react";
@@ -36,8 +41,17 @@ import { useForm } from "react-hook-form";
 const SideNav = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
-  const { setFormData, user, formList, fetchData, newForm, formData } =
-    useContext(FormContext);
+  const {
+    setFormData,
+    user,
+    formList,
+    fetchData,
+    newForm,
+    formData,
+    clearForms,
+    isInitialAdd,
+    idCounter
+  } = useContext(FormContext);
   const { register, getValues } = useForm();
   const handleGoogleClick = async (
     event: React.MouseEvent<HTMLButtonElement>
@@ -47,9 +61,6 @@ const SideNav = () => {
     } else {
       await signInWithPopup(auth, googleProvider);
     }
-  };
-  const handleClose = () => {
-    setAnchorEl(null);
   };
   const handleLogout = async () => {
     await signOut(auth);
@@ -61,12 +72,11 @@ const SideNav = () => {
     },
   });
 
-  const [maxch] = useState("20ch");
-
   const [action, setaction] = useState("false");
   const [enableText, setenableText] = useState("false");
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [snackBar, setSnackBar] = useState({ open: false, title: "" });
+  const [showDialog, setShowDialog] = useState(false);
 
   const handleDelete = async () => {
     setaction("false");
@@ -90,12 +100,24 @@ const SideNav = () => {
     setSnackBar({ open: true, title: "Title updated Successfully!" });
   };
 
+  const handleClearForm = async (event: any) => {
+    console.log("enve:", event);
+    console.log("enve:", event.target.textContent === "DELETE ALL");
+    if (event.target.textContent === "DELETE ALL") {
+      await clearForms();
+    }
+    setShowDialog(false);
+    setAnchorEl(null);
+  };
+
   useEffect(() => {
     fetchData();
   }, [user]);
 
   const handleSetForm = (form: any) => {
     const { rows, id, title, ...data } = form;
+    isInitialAdd.current = false;
+    idCounter.current = rows.length;
     setFormData({ rows, data, id, title });
   };
 
@@ -187,7 +209,7 @@ const SideNav = () => {
                           textOverflow: "ellipsis",
                           whiteSpace: "nowrap",
                           overflow: "hidden",
-                          maxWidth: maxch,
+                          maxWidth: "20ch",
                         }}
                       />
                     </Tooltip>
@@ -294,17 +316,23 @@ const SideNav = () => {
                 horizontal: "left",
               }}
               open={open}
-              onClose={handleClose}
+              onClose={() => {
+                setAnchorEl(null);
+              }}
               sx={{ marginBottom: 33 }}
               MenuListProps={{
                 "aria-labelledby": "basic-button",
               }}
             >
-              <MenuItem onClick={handleClose}>
+              <MenuItem
+                onClick={() => {
+                  setShowDialog(true);
+                }}
+              >
                 <ListItemIcon>
                   <DeleteOutlineIcon fontSize="small" />
                 </ListItemIcon>
-                <ListItemText>Clear Forms</ListItemText>
+                <ListItemText>Clear All Forms</ListItemText>
               </MenuItem>
               <Divider />
               <MenuItem onClick={handleLogout}>
@@ -314,25 +342,23 @@ const SideNav = () => {
                 <ListItemText>Logout</ListItemText>
               </MenuItem>
             </Menu>
-            <center>
-              <Button
-                id="basic-button"
-                aria-controls={open ? "basic-menu" : undefined}
-                aria-haspopup="true"
-                aria-expanded={open ? "true" : undefined}
-                onClick={handleGoogleClick}
-                startIcon={!user && <GoogleIcon fontSize="small" />}
-                endIcon={user && <MoreHorizIcon fontSize="small" />}
-                style={{
-                  fontSize: "14px",
-                  width: 160,
-                  color: "#ffffff",
-                  textTransform: "none",
-                }}
-              >
-                {user ? user.displayName : "Google Sign In"}
-              </Button>
-            </center>
+            <Button
+              id="basic-button"
+              aria-controls={open ? "basic-menu" : undefined}
+              aria-haspopup="true"
+              aria-expanded={open ? "true" : undefined}
+              onClick={handleGoogleClick}
+              startIcon={!user && <GoogleIcon fontSize="small" />}
+              endIcon={user && <MoreHorizIcon fontSize="small" />}
+              style={{
+                fontSize: "14px",
+                width: 160,
+                color: "#ffffff",
+                textTransform: "none",
+              }}
+            >
+              {user ? user.displayName : "Google Sign In"}
+            </Button>
           </div>
         </Drawer>
       </ThemeProvider>
@@ -353,6 +379,25 @@ const SideNav = () => {
           {snackBar.title}
         </Alert>
       </Snackbar>
+      <Dialog
+        open={showDialog}
+        onClose={handleClearForm}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">Delete all Forms</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure you want to clear all forms?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClearForm}>No</Button>
+          <Button onClick={handleClearForm} autoFocus>
+            DELETE ALL
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };

@@ -1,9 +1,10 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useRef, useState } from "react";
 import { tableData } from "../pages/Slab/Slab";
 import {
   DocumentData,
   collection,
   getDocs,
+  deleteDoc,
   orderBy,
   query,
 } from "firebase/firestore";
@@ -24,7 +25,7 @@ const obj: tableData = {
 const curr = new Date();
 curr.setDate(curr.getDate() + 0);
 const curDate = curr.toISOString().substring(0, 10);
-const initialState = {
+export const initialState = {
   data: {
     partyName: "",
     date: curDate,
@@ -48,8 +49,10 @@ export const FormContextProvider = ({ children }: any) => {
   const [user, setUser] = useState<User | null>(null);
   const [formList, setFormList] = useState<DocumentData[]>([]);
   const [formData, setFormData] = useState(initialState);
+  const [loading, setLoading] = useState(false);
   const userDocRef = collection(db, `users/${user?.uid}/forms`);
-
+  const isInitialAdd = useRef(true);
+  const idCounter = useRef(1);
   useEffect(() => {
     onAuthStateChanged(auth, (res) => {
       setUser(res);
@@ -76,6 +79,10 @@ export const FormContextProvider = ({ children }: any) => {
   };
 
   const newForm = () => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
     const newState = {
       data: {
         partyName: "",
@@ -97,10 +104,32 @@ export const FormContextProvider = ({ children }: any) => {
       title: null,
     };
     console.log("initialState:", newState);
+    idCounter.current = 1;
+    isInitialAdd.current = true;
     setFormData({ ...newState });
   };
 
-  const value = { formData, formList, user, fetchData, setFormData, newForm };
+  const clearForms = async () => {
+    const querySnapshot = await getDocs(userDocRef);
+    querySnapshot.forEach(async (doc) => {
+      await deleteDoc(doc.ref);
+    });
+    newForm();
+    await fetchData();
+  };
+
+  const value = {
+    formData,
+    formList,
+    user,
+    fetchData,
+    setFormData,
+    newForm,
+    clearForms,
+    isInitialAdd,
+    idCounter,
+    loading,
+  };
 
   return (
     <FormContext.Provider value={value}> {children} </FormContext.Provider>
