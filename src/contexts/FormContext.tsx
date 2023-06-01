@@ -31,15 +31,15 @@ export const initialState = {
     date: curDate,
     quality: "",
     vehicleNo: "",
-    addRows: null,
-    startingRow: "",
-    repeatCount: "",
+    addRows: 0,
+    startingRow: 1,
+    repeatCount: 0,
     totalSqFeet: 0,
     pricePerSqFeet: 0,
     totalCost: 0,
     totalAreaUnit: "Feet",
     measurementUnit: "feet",
-    maxSqFeet: "",
+    maxSqFeet: 0,
   },
   rows: [{ ...obj }],
   id: null,
@@ -55,6 +55,8 @@ export const FormContextProvider = ({ children }: any) => {
   const idCounter = useRef(1);
   useEffect(() => {
     onAuthStateChanged(auth, (res) => {
+      console.log('resUser:', res);
+      
       setUser(res);
       if (!res) {
         setFormList([]);
@@ -89,15 +91,15 @@ export const FormContextProvider = ({ children }: any) => {
         date: curDate,
         quality: "",
         vehicleNo: "",
-        addRows: null,
-        startingRow: "",
-        repeatCount: "",
+        addRows: 0,
+        startingRow: 1,
+        repeatCount: 0,
         totalSqFeet: 0,
         pricePerSqFeet: 0,
         totalCost: 0,
         totalAreaUnit: "Feet",
         measurementUnit: "feet",
-        maxSqFeet: "",
+        maxSqFeet: 0,
       },
       rows: [{ ...obj }],
       id: null,

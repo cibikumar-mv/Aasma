@@ -41,6 +41,7 @@ import Typography from "@mui/material/Typography";
 import MenuIcon from "@mui/icons-material/Menu";
 import { deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { useForm } from "react-hook-form";
+import "./SideBar.scss";
 const SideBar = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const { register, getValues } = useForm();
@@ -54,7 +55,7 @@ const SideBar = () => {
     formData,
     clearForms,
     isInitialAdd,
-    idCounter
+    idCounter,
   } = useContext(FormContext);
   const handleGoogleClick = async (
     event: React.MouseEvent<HTMLButtonElement>
@@ -393,7 +394,18 @@ const SideBar = () => {
                     textTransform: "none",
                   }}
                 >
-                  {user ? user.displayName : "Google Sign In"}
+                  {user ? (
+                    <div className="profile-container">
+                      <img
+                        className="profile-image"
+                        src={user?.photoURL}
+                        alt="Profile"
+                      />
+                      {user?.displayName}
+                    </div>
+                  ) : (
+                    "Google Sign In"
+                  )}
                 </Button>
               </center>
             </div>

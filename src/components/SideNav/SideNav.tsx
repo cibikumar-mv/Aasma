@@ -38,6 +38,7 @@ import DoneIcon from "@mui/icons-material/Done";
 import CloseIcon from "@mui/icons-material/Close";
 import { deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { useForm } from "react-hook-form";
+import "./SideNav.scss";
 const SideNav = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -50,7 +51,7 @@ const SideNav = () => {
     formData,
     clearForms,
     isInitialAdd,
-    idCounter
+    idCounter,
   } = useContext(FormContext);
   const { register, getValues } = useForm();
   const handleGoogleClick = async (
@@ -357,7 +358,18 @@ const SideNav = () => {
                 textTransform: "none",
               }}
             >
-              {user ? user.displayName : "Google Sign In"}
+              {user ? (
+                <div className="profile-container">
+                  <img
+                    className="profile-image"
+                    src={user?.photoURL}
+                    alt="Profile"
+                  />
+                  {user?.displayName}
+                </div>
+              ) : (
+                "Google Sign In"
+              )}
             </Button>
           </div>
         </Drawer>

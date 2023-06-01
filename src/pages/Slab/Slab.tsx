@@ -190,7 +190,9 @@ const Slab = () => {
 
     if (isInitialAdd.current) {
       const initialCount = getValues("startingRow");
-      idCounter.current = initialCount ? parseInt(initialCount) - 1 : 0;
+      idCounter.current = parseInt(initialCount) ? parseInt(initialCount) - 1 : 0;
+      console.log('idCounter:', idCounter.current);
+      
       isInitialAdd.current = false;
       for (let i = 0; i < count; i++) {
         idCounter.current += 1;
@@ -235,6 +237,28 @@ const Slab = () => {
     calculateTotalArea();
   };
 
+  const handleKeyDown = () => {
+    // const keyCode = event.keyCode || event.which;
+    // const keyValue = String.fromCharCode(keyCode);
+    // // Prevent typing of negative symbol (minus sign)
+    // if (keyValue === '-') {
+    //   event.preventDefault();
+    // }
+  };
+
+  const handleInputChange = (event: any) => {
+    const value = event.target.value;
+    // console.log('here',value,value.includes('-'));
+
+    // Remove negative symbol (minus sign)
+    // if (value.includes('-')) {
+    // value = value.replace(/-/g, '');
+    // }
+
+    // Update the input value
+    event.target.value = Math.abs(value);
+  };
+
   const handleAddRow = (count: any | null) => {
     if (count) {
       const totalCount = isInitialAdd.current
@@ -275,7 +299,8 @@ const Slab = () => {
 
     if (
       showMaxAlert.current &&
-      total >= parseFloat(getValues("maxSqFeet")) * 0.9
+      getValues("maxSqFeet") &&
+      total >= getValues("maxSqFeet") * 0.9
     ) {
       // setShowAlert(true);
       alert("Total sq feet reaches near to your limit!");
@@ -576,6 +601,7 @@ const Slab = () => {
                       fullWidth
                       variant="outlined"
                       sx={{ maxHeight: 40, marginTop: "2px" }}
+                      onKeyDown={handleKeyDown}
                       inputProps={{
                         min: 0,
                         style: {
@@ -583,7 +609,9 @@ const Slab = () => {
                         },
                       }}
                       type="number"
-                      {...register("maxSqFeet")}
+                      {...register("maxSqFeet", {
+                        onChange: handleInputChange,
+                      })}
                     />
                   </Grid>
                   <Grid item xs={12} sm={4}>
@@ -595,6 +623,7 @@ const Slab = () => {
                       helperText="Max 700 rows"
                       variant="outlined"
                       sx={{ maxHeight: 40, marginTop: "2px" }}
+                      onKeyDown={handleKeyDown}
                       inputProps={{
                         min: 1,
                         style: {
@@ -602,7 +631,9 @@ const Slab = () => {
                         },
                       }}
                       type="number"
-                      {...register("addRows")}
+                      {...register("addRows", {
+                        onChange: handleInputChange,
+                      })}
                     />
                   </Grid>
                   <Grid item xs={12} sm={4}>
@@ -613,6 +644,7 @@ const Slab = () => {
                       placeholder="Enter starting row"
                       variant="outlined"
                       sx={{ maxHeight: 40, marginTop: "2px" }}
+                      onKeyDown={handleKeyDown}
                       inputProps={{
                         min: 1,
                         style: {
@@ -620,7 +652,9 @@ const Slab = () => {
                         },
                       }}
                       type="number"
-                      {...register("startingRow")}
+                      {...register("startingRow", {
+                        onChange: handleInputChange,
+                      })}
                     />
                   </Grid>
                   <Grid item xs={12} sm={2}>
@@ -648,8 +682,8 @@ const Slab = () => {
                         variant="contained"
                         color="secondary"
                         onClick={() => {
-                          setValue("startingRow", "");
-                          setValue("addRows", null);
+                          setValue("startingRow", 1);
+                          setValue("addRows", 0);
                           setValue("totalSqFeet", 0);
                           setValue("pricePerSqFeet", 0);
                           setRows(createRandomRow(-1));
@@ -893,6 +927,7 @@ const Slab = () => {
                       id="pricePerSqFeet"
                       variant="outlined"
                       sx={{ maxHeight: 40, marginTop: "2px" }}
+                      onKeyDown={handleKeyDown}
                       inputProps={{
                         min: 1,
                         style: {
@@ -900,7 +935,9 @@ const Slab = () => {
                         },
                       }}
                       type="number"
-                      {...register("pricePerSqFeet")}
+                      {...register("pricePerSqFeet", {
+                        onChange: handleInputChange,
+                      })}
                     />
                   </Grid>
                   <Grid item xs={12} md={4}>
@@ -1116,6 +1153,27 @@ const Slab = () => {
           </Button>
         </DialogContent>
       </Dialog>
+      <MediaQuery maxWidth={1223}>
+        <div className="footer">
+          <p style={{ marginTop: "5px" }}>
+            Made with ❤️ in India
+          </p>
+          <p>
+            <a
+              href="http://www.aasmatech.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                color: "white",
+                textDecoration: "none",
+              }}
+            >
+              Aasma Technology Solutions
+            </a>{" "}
+            © 2023 - All rights reserved
+          </p>
+        </div>
+      </MediaQuery>
     </>
   );
 };

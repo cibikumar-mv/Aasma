@@ -5,7 +5,7 @@ import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import MediaQuery from "react-responsive";
 import SideNav from "../SideNav/SideNav";
 import SideBar from "../SideBar/SideBar";
-import { FormContext, FormContextProvider } from "../../contexts/FormContext";
+import { FormContext } from "../../contexts/FormContext";
 import logo from "/src/assets/aasmalogonew.png";
 import LinearProgress from "@mui/material/LinearProgress";
 import { useContext } from "react";
@@ -100,8 +100,10 @@ const PageLayout = () => {
           </>
         )}
       </main>
+      <MediaQuery minWidth={1224}>
 
       <footer>
+        <p style={{marginTop: '5px'}}>Made with ❤️ in India</p>
         <p>
           <a
             href="http://www.aasmatech.com"
@@ -117,6 +119,7 @@ const PageLayout = () => {
           © 2023 - All rights reserved
         </p>
       </footer>
+      </MediaQuery>
     </>
   );
 };
