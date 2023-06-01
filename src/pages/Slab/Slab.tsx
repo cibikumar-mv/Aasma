@@ -134,7 +134,6 @@ const Slab = () => {
   useEffect(() => {
     reset(formData.data);
     setRows(formData.rows);
-    console.log("datasd:", formData, idCounter.current);
   }, [formData]);
 
   const convertArea = () => {
@@ -189,10 +188,12 @@ const Slab = () => {
     const array = [];
 
     if (isInitialAdd.current) {
-      const initialCount = getValues("startingRow");
-      idCounter.current = parseInt(initialCount) ? parseInt(initialCount) - 1 : 0;
-      console.log('idCounter:', idCounter.current);
-      
+      if (parseInt(getValues("addRows")) === 0) {
+        idCounter.current = 1;
+      } else {
+        idCounter.current = parseInt(getValues("startingRow")) - 1;
+      }
+
       isInitialAdd.current = false;
       for (let i = 0; i < count; i++) {
         idCounter.current += 1;
@@ -202,8 +203,6 @@ const Slab = () => {
     }
 
     for (let i = 0; i < count; i++) {
-      console.log("in loop:", idCounter.current);
-
       idCounter.current += 1;
       array.push({ ...obj, id: idCounter.current, srno: idCounter.current });
     }
@@ -248,14 +247,6 @@ const Slab = () => {
 
   const handleInputChange = (event: any) => {
     const value = event.target.value;
-    // console.log('here',value,value.includes('-'));
-
-    // Remove negative symbol (minus sign)
-    // if (value.includes('-')) {
-    // value = value.replace(/-/g, '');
-    // }
-
-    // Update the input value
     event.target.value = Math.abs(value);
   };
 
@@ -299,11 +290,11 @@ const Slab = () => {
 
     if (
       showMaxAlert.current &&
-      getValues("maxSqFeet") &&
+      getValues("maxSqFeet") != 0 &&
       total >= getValues("maxSqFeet") * 0.9
     ) {
       // setShowAlert(true);
-      alert("Total sq feet reaches near to your limit!");
+      alert(`Total sq ${watchTotalAreaUnit} reaches near to your limit!`);
       showMaxAlert.current = false;
     }
     setValue("totalSqFeet", Math.round(total * 100) / 100);
@@ -333,7 +324,6 @@ const Slab = () => {
     let netTotal = 0;
     let dataLen = rows.length;
     const pageRows = [];
-    console.log("lastfilled:", lastEditedIndex);
 
     const pages = Math.ceil(lastFilledIdx / 70);
     for (let i = 0; i < pages; i++) {
@@ -386,7 +376,6 @@ const Slab = () => {
       alert("Please fill atleast 1 record");
       return;
     }
-    console.log("title:", formData.title, formData);
 
     const postObj = {
       ...getValues(),
@@ -395,7 +384,6 @@ const Slab = () => {
         ? formData.title
         : getValues("partyName") + "_" + getValues("date"),
     };
-    console.log("id:", formData.id);
 
     if (formData.id) {
       const ref = doc(db, `users/${user?.uid}/forms`, formData.id);
@@ -1155,9 +1143,7 @@ const Slab = () => {
       </Dialog>
       <MediaQuery maxWidth={1223}>
         <div className="footer">
-          <p style={{ marginTop: "5px" }}>
-            Made with ❤️ in India
-          </p>
+          <p style={{ marginTop: "5px" }}>Made with ❤️ in India</p>
           <p>
             <a
               href="http://www.aasmatech.com"

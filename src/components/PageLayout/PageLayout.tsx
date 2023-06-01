@@ -25,12 +25,14 @@ const PageLayout = () => {
   const { loading } = useContext(FormContext);
   return (
     <>
-      <MediaQuery minWidth={1224}>
-        <SideNav />
-      </MediaQuery>
-      <MediaQuery maxWidth={1223}>
-        <SideBar />
-      </MediaQuery>
+      <div className="navbar">
+        <MediaQuery minWidth={1224}>
+          <SideNav />
+        </MediaQuery>
+        <MediaQuery maxWidth={1223}>
+          <SideBar />
+        </MediaQuery>
+      </div>
       <main>
         {loading ? (
           <div
@@ -101,24 +103,23 @@ const PageLayout = () => {
         )}
       </main>
       <MediaQuery minWidth={1224}>
-
-      <footer>
-        <p style={{marginTop: '5px'}}>Made with ❤️ in India</p>
-        <p>
-          <a
-            href="http://www.aasmatech.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              color: "white",
-              textDecoration: "none",
-            }}
-          >
-            Aasma Technology Solutions
-          </a>{" "}
-          © 2023 - All rights reserved
-        </p>
-      </footer>
+        <footer>
+          <p style={{ marginTop: "5px" }}>Made with ❤️ in India</p>
+          <p>
+            <a
+              href="http://www.aasmatech.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                color: "white",
+                textDecoration: "none",
+              }}
+            >
+              Aasma Technology Solutions
+            </a>{" "}
+            © 2023 - All rights reserved
+          </p>
+        </footer>
       </MediaQuery>
     </>
   );

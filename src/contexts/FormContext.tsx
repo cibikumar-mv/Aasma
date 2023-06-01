@@ -52,17 +52,15 @@ export const FormContextProvider = ({ children }: any) => {
   const [loading, setLoading] = useState(false);
   const userDocRef = collection(db, `users/${user?.uid}/forms`);
   const isInitialAdd = useRef(true);
-  const idCounter = useRef(1);
+  const idCounter = useRef(-1);
   useEffect(() => {
     onAuthStateChanged(auth, (res) => {
-      console.log('resUser:', res);
       
       setUser(res);
       if (!res) {
         setFormList([]);
       }
     });
-    console.log("context:", formData);
   }, []);
   const fetchData = async () => {
     if (!user) return;
@@ -74,7 +72,6 @@ export const FormContextProvider = ({ children }: any) => {
         id: doc.id,
       }));
       setFormList(forms);
-      console.log("forms:", forms);
     } catch (error) {
       console.error("Error fetching forms:", error);
     }
@@ -105,8 +102,7 @@ export const FormContextProvider = ({ children }: any) => {
       id: null,
       title: null,
     };
-    console.log("initialState:", newState);
-    idCounter.current = 1;
+    idCounter.current = -1;
     isInitialAdd.current = true;
     setFormData({ ...newState });
   };

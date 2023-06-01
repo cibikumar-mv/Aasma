@@ -86,7 +86,6 @@ const SideBar = () => {
   const handleTitleEdit = async (i: number) => {
     const { id, ...postData } = formData;
 
-    console.log("post:", postData, getValues(`title${i}`));
     setenableText("false");
     setaction("false");
     await updateDoc(doc(db, `users/${user?.uid}/forms/${formData.id}`), {
@@ -107,10 +106,7 @@ const SideBar = () => {
   const [snackBar, setSnackBar] = useState({ open: false, title: "" });
 
   useEffect(() => {
-    console.log("formList:", formList);
-    console.log("formData:", formData);
     const index = formList.findIndex((form: any) => form.id === formData.id);
-    console.log("index:", index);
     setSelectedIndex(index);
   }, [formData, formList]);
 
@@ -127,8 +123,6 @@ const SideBar = () => {
   };
 
   const handleClearForm = async (event: any) => {
-    console.log("enve:", event);
-    console.log("enve:", event.target.textContent === "DELETE ALL");
     if (event.target.textContent === "DELETE ALL") {
       await clearForms();
     }
@@ -167,6 +161,7 @@ const SideBar = () => {
                 boxSizing: "border-box",
               },
             }}
+            className="navScroll"
             variant="temporary"
             anchor="left"
             open={drawerOpen}

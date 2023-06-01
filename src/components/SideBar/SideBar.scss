@@ -1,13 +1,36 @@
 .profile-image {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+
+.profile-container {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  align-items: center;
+}
+
+.navScroll {
+  /* width */
+  ::-webkit-scrollbar {
+    width: 5px;
   }
-  
-  .profile-container {
-      display: flex;
-      gap: 10px;
-      width: 100%;
-      align-items: center;
+
+  /* Track */
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 15px;
   }
-  
+
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 15px;
+  }
+
+  /* Handle on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+}
