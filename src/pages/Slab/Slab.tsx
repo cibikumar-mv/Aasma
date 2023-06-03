@@ -180,13 +180,19 @@ const Slab = () => {
     });
   };
 
-  const createRandomRow = (count: number) => {
+  const createRows = (count: number, pdf?: number) => {
     if (count === -1) {
       idCounter.current = 0;
       return [{ ...obj }];
     }
     const array = [];
-
+    if (pdf) {
+      for (let i = 0; i < count; i++) {
+        pdf += 1;
+        array.push({ ...obj, id: pdf, srno: pdf });
+      }
+      return array;
+    }
     if (isInitialAdd.current) {
       if (parseInt(getValues("addRows")) === 0) {
         idCounter.current = 1;
@@ -265,16 +271,16 @@ const Slab = () => {
         return;
       }
       if (isInitialAdd.current) {
-        setRows(createRandomRow(count));
+        setRows(createRows(count));
       } else {
-        setRows((prevRows) => [...prevRows, ...createRandomRow(count)]);
+        setRows((prevRows) => [...prevRows, ...createRows(count)]);
       }
     } else {
       if (!showExitPrompt) {
         setShowExitPrompt(true);
       }
       reset(initialState.data);
-      setRows(createRandomRow(-1));
+      setRows(createRows(-1));
       isInitialAdd.current = true;
       idCounter.current = 1;
     }
@@ -354,7 +360,10 @@ const Slab = () => {
           }
         });
         netTotal = pageTotal + netTotal;
-        const padRows = createRandomRow(71 - dataRows.length);
+        const padRows = createRows(
+          71 - dataRows.length,
+          dataRows[dataRows.length-1].srno
+        );
         const obj = {
           rows: dataRows.concat(padRows),
           pageTotal: Math.round(pageTotal * 100) / 100,
@@ -674,7 +683,7 @@ const Slab = () => {
                           setValue("addRows", 0);
                           setValue("totalSqFeet", 0);
                           setValue("pricePerSqFeet", 0);
-                          setRows(createRandomRow(-1));
+                          setRows(createRows(-1));
                           idCounter.current = 1;
                           isInitialAdd.current = true;
                         }}

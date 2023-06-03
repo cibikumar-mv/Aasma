@@ -68,6 +68,7 @@ const SideBar = () => {
   };
   const handleLogout = async () => {
     await signOut(auth);
+    newForm();
     setAnchorEl(null);
   };
   const darkTheme = createTheme({
@@ -98,7 +99,6 @@ const SideBar = () => {
 
   const [drawerOpen, setdrawerOpen] = useState(false);
 
-  const [maxch] = useState("20ch");
   const [action, setaction] = useState("false");
   const [enableText, setenableText] = useState("false");
   const [selectedIndex, setSelectedIndex] = useState(-1);
@@ -119,6 +119,7 @@ const SideBar = () => {
     const { rows, id, title, ...data } = form;
     idCounter.current = rows.length;
     isInitialAdd.current = false;
+    setdrawerOpen(false);
     setFormData({ rows, data, id, title });
   };
 
@@ -154,10 +155,10 @@ const SideBar = () => {
           </AppBar>
           <Drawer
             sx={{
-              width: 170,
+              width: 210,
               flexShrink: 0,
               "& .MuiDrawer-paper": {
-                width: 170,
+                width: 210,
                 boxSizing: "border-box",
               },
             }}
@@ -181,6 +182,7 @@ const SideBar = () => {
                 }}
                 onClick={() => {
                   setSelectedIndex(-1);
+                  setdrawerOpen(false);
                   newForm();
                 }}
               >
@@ -189,7 +191,10 @@ const SideBar = () => {
                 >
                   <AddIcon style={{ height: 18, width: 18 }} />
                 </ListItemIcon>
-                <ListItemText primary="New Form" style={{ fontSize: "8px" }} />
+                <ListItemText
+                  primary="New Form"
+                  style={{ fontSize: "8px", textAlign: "center" }}
+                />
               </ListItemButton>
             </List>
             {user && <Divider />}
@@ -207,7 +212,7 @@ const SideBar = () => {
                       padding: 5,
                       alignItems: "center",
                       height: 50,
-                      width: 170,
+                      width: 210,
                     }}
                     selected={selectedIndex === index}
                   >
@@ -215,6 +220,9 @@ const SideBar = () => {
                       <TextField
                         margin="dense"
                         defaultValue={form.title}
+                        onClick={(e: any) => {
+                          e.stopPropagation();
+                        }}
                         sx={{
                           "& .MuiInputBase-root": {
                             height: 30,
@@ -231,7 +239,7 @@ const SideBar = () => {
                             textOverflow: "ellipsis",
                             whiteSpace: "nowrap",
                             overflow: "hidden",
-                            maxWidth: maxch,
+                            maxWidth: "30ch",
                           }}
                         />
                       </Tooltip>
@@ -255,16 +263,18 @@ const SideBar = () => {
                             }}
                           >
                             <IconButton
-                              onClick={() => {
+                              onClick={(e: any) => {
                                 setaction("edit");
                                 setenableText("true");
+                                e.stopPropagation();
                               }}
                             >
                               <CreateIcon fontSize="small" />
                             </IconButton>
                             <IconButton
-                              onClick={() => {
+                              onClick={(e: any) => {
                                 setaction("delete");
+                                e.stopPropagation();
                               }}
                             >
                               <DeleteForeverIcon fontSize="small" />
@@ -281,16 +291,18 @@ const SideBar = () => {
                             }}
                           >
                             <IconButton
-                              onClick={() => {
+                              onClick={(e: any) => {
                                 handleTitleEdit(index);
+                                e.stopPropagation();
                               }}
                             >
                               <DoneIcon fontSize="small" />
                             </IconButton>
                             <IconButton
-                              onClick={() => {
+                              onClick={(e: any) => {
                                 setaction("false");
                                 setenableText("false");
+                                e.stopPropagation();
                               }}
                             >
                               <CloseIcon fontSize="small" />
@@ -306,12 +318,18 @@ const SideBar = () => {
                               margin: 0,
                             }}
                           >
-                            <IconButton onClick={handleDelete}>
+                            <IconButton
+                              onClick={(e: any) => {
+                                handleDelete();
+                                e.stopPropagation();
+                              }}
+                            >
                               <DoneIcon fontSize="small" />
                             </IconButton>
                             <IconButton
-                              onClick={() => {
+                              onClick={(e: any) => {
                                 setaction("false");
+                                e.stopPropagation();
                               }}
                             >
                               <CloseIcon fontSize="small" />

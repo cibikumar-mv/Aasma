@@ -65,6 +65,7 @@ const SideNav = () => {
   };
   const handleLogout = async () => {
     await signOut(auth);
+    newForm();
     setAnchorEl(null);
   };
   const darkTheme = createTheme({
