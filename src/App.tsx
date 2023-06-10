@@ -7,6 +7,7 @@ function App() {
     <Routes>
       <Route path="/" element={<PageLayout />}>
         <Route path="/" element={<Slab />} />
+        <Route path="/sme" element={<Slab />} />
       </Route>
     </Routes>
   );
