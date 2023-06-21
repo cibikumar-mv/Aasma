@@ -268,7 +268,7 @@ const PdfFile = ({ rowData, invoiceData }: any) => {
           }}
         >
           <Text style={style.footer}>
-            <Link src="http://www.aasmatech.com">
+            <Link src="https://www.aasmatech.com">
               Aasma Technology Solutions
             </Link>
             &nbsp; <Image src={copyright} />
@@ -407,7 +407,7 @@ const PdfFile = ({ rowData, invoiceData }: any) => {
               }}
             >
               <Text style={style.footer}>
-                <Link src="http://www.aasmatech.com">
+                <Link src="https://www.aasmatech.com">
                   Aasma Technology Solutions
                 </Link>
                 &nbsp; <Image src={copyright} />

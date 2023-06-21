@@ -448,7 +448,7 @@ const Slab = () => {
                   <Grid item xs={12} pb={5} sx={{ paddingBottom: 0 }}>
                     <div style={{ display: "flex" }}>
                       <a
-                        href="http://www.aasmatech.com"
+                        href="https://www.aasmatech.com"
                         target="_blank"
                         rel="noopener noreferrer"
                       >
@@ -1155,7 +1155,7 @@ const Slab = () => {
           <p style={{ marginTop: "5px" }}>Made with ❤️ in India</p>
           <p>
             <a
-              href="http://www.aasmatech.com"
+              href="https://www.aasmatech.com"
               target="_blank"
               rel="noopener noreferrer"
               style={{

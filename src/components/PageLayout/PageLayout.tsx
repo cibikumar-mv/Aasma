@@ -47,7 +47,7 @@ const PageLayout = () => {
           >
             <center>
               <a
-                href="http://www.aasmatech.com"
+                href="https://www.aasmatech.com"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -107,7 +107,7 @@ const PageLayout = () => {
           <p style={{ marginTop: "5px" }}>Made with ❤️ in India</p>
           <p>
             <a
-              href="http://www.aasmatech.com"
+              href="https://www.aasmatech.com"
               target="_blank"
               rel="noopener noreferrer"
               style={{
