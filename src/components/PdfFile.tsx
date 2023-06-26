@@ -104,7 +104,7 @@ const PdfFile = ({ rowData, invoiceData }: any) => {
       <Page size={"A4"} style={{}}>
         <Link
           style={style.title}
-          src="http://sme.aasmatech.com/"
+          src="https://sme.aasmatech.com/"
         >
           SLAB MEASUREMENT ESTIMATE
         </Link>
