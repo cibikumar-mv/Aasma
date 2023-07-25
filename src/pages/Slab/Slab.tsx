@@ -126,8 +126,8 @@ const Slab = () => {
   useEffect(() => {
     setValue(
       "totalCost",
-      Math.round(getValues("pricePerSqFeet") * getValues("totalSqFeet") * 100) /
-        100
+      Math.round(getValues("pricePerSqFeet") * getValues("totalSqFeet") * 1000) /
+        1000
     );
   }, [watchPrice, watchtTotalArea]);
 
@@ -148,7 +148,7 @@ const Slab = () => {
               area =
                 row.sqFeet *
                 (aUnit === "Feet" ? Convert.CmtoFeet : Convert.CmtoMeter);
-              row.area = Math.round(area * 100) / 100;
+              row.area = Math.round(area * 1000) / 1000;
             }
           });
           break;
@@ -158,7 +158,7 @@ const Slab = () => {
               area =
                 row.sqFeet *
                 (aUnit === "Feet" ? Convert.MeterToFeet : Convert.FeetToMeter);
-              row.area = Math.round(area * 100) / 100;
+              row.area = Math.round(area * 1000) / 1000;
             }
           });
           break;
@@ -168,7 +168,7 @@ const Slab = () => {
               area =
                 row.sqFeet *
                 (aUnit === "Feet" ? Convert.InchToFeet : Convert.InchToMeter);
-              row.area = Math.round(area * 100) / 100;
+              row.area = Math.round(area * 1000) / 1000;
             }
           });
           break;
@@ -303,7 +303,7 @@ const Slab = () => {
       alert(`Total sq ${watchTotalAreaUnit} reaches near to your limit!`);
       showMaxAlert.current = false;
     }
-    setValue("totalSqFeet", Math.round(total * 100) / 100);
+    setValue("totalSqFeet", Math.round(total * 1000) / 1000);
   };
 
   const getLastFilledIndex = () => {
@@ -344,12 +344,12 @@ const Slab = () => {
         netTotal = pageTotal + netTotal;
         const obj = {
           rows: rows.slice(i * 70, (i + 1) * 70),
-          pageTotal: Math.round(pageTotal * 100) / 100,
+          pageTotal: Math.round(pageTotal * 1000) / 1000,
           pageCost:
-            Math.round(getValues("pricePerSqFeet") * pageTotal * 100) / 100,
-          netTotal: Math.round(netTotal * 100) / 100,
+            Math.round(getValues("pricePerSqFeet") * pageTotal * 1000) / 1000,
+          netTotal: Math.round(netTotal * 1000) / 1000,
           netCost:
-            Math.round(getValues("pricePerSqFeet") * netTotal * 100) / 100,
+            Math.round(getValues("pricePerSqFeet") * netTotal * 1000) / 1000,
         };
         pageRows.push(obj);
       } else {
@@ -366,12 +366,12 @@ const Slab = () => {
         );
         const obj = {
           rows: dataRows.concat(padRows),
-          pageTotal: Math.round(pageTotal * 100) / 100,
+          pageTotal: Math.round(pageTotal * 1000) / 1000,
           pageCost:
-            Math.round(getValues("pricePerSqFeet") * pageTotal * 100) / 100,
-          netTotal: Math.round(netTotal * 100) / 100,
+            Math.round(getValues("pricePerSqFeet") * pageTotal * 1000) / 1000,
+          netTotal: Math.round(netTotal * 1000) / 1000,
           netCost:
-            Math.round(getValues("pricePerSqFeet") * netTotal * 100) / 100,
+            Math.round(getValues("pricePerSqFeet") * netTotal * 1000) / 1000,
         };
         pageRows.push(obj);
       }
@@ -778,7 +778,7 @@ const Slab = () => {
                                           break;
                                       }
                                       prev[i].area =
-                                        Math.round(area * 100) / 100;
+                                        Math.round(area * 1000) / 1000;
                                       calculateTotalArea();
                                       return [...prev];
                                     });
@@ -835,7 +835,7 @@ const Slab = () => {
                                           break;
                                       }
                                       prev[i].area =
-                                        Math.round(area * 100) / 100;
+                                        Math.round(area * 1000) / 1000;
                                       calculateTotalArea();
                                       return [...prev];
                                     });
